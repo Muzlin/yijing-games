@@ -26,7 +26,7 @@ class _GameSetupSheet extends StatefulWidget {
 
 class _GameSetupSheetState extends State<_GameSetupSheet> {
   PlayMode _mode = PlayMode.ai;
-  int _level = 1;
+  int _level = 2; // default to 高手 so the dedicated engines have some depth
   int _side = 0;
   int _boardSize = 0;
 
