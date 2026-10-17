@@ -130,6 +130,21 @@ void main() {
       expect(game.legalTargets(lion), isNot(contains(4 * 7 + 3)));
     });
 
+    test('no draw after 100 quiet moves', () {
+      final game = JungleGame();
+      game.board.fillRange(0, 63, 0);
+      game.board[8 * 7 + 0] = 0 * 16 + 7; // red lion
+      game.board[8 * 7 + 6] = 1 * 16 + 7; // blue lion
+      for (var i = 0; i < 60; i++) {
+        game.apply([8 * 7 + 0, 8 * 7 + 1]);
+        game.apply([8 * 7 + 6, 8 * 7 + 5]);
+        game.apply([8 * 7 + 1, 8 * 7 + 0]);
+        game.apply([8 * 7 + 5, 8 * 7 + 6]);
+      }
+      expect(game.isOver, isFalse);
+      expect(game.winner, isNull);
+    });
+
     test('entering the den wins', () {
       final game = JungleGame();
       game.board.fillRange(0, 63, 0);

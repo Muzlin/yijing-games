@@ -115,17 +115,12 @@ class JungleGame extends TurnGame {
 
   @override
   String get resultTitle {
-    if (_winner == 2) return '和棋';
     if (_winner == null) return '';
     return '${sideName(_winner!)}胜';
   }
 
   @override
-  String get resultSubtitle {
-    if (_winner == 2) return '长时间无吃子';
-    if (_winner == null) return '';
-    return '攻入兽穴';
-  }
+  String get resultSubtitle => _winner == null ? '' : '攻入兽穴';
 
   @override
   String scoreText(int side) {
@@ -244,9 +239,7 @@ class JungleGame extends TurnGame {
         _winner = 1 - opponent;
         return;
       }
-      if (_noCapture >= 100) {
-        _winner = 2;
-      }
+      // No draw in standard 斗兽棋.
     }
   }
 
