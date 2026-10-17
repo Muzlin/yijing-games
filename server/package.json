@@ -1,0 +1,17 @@
+{
+  "name": "yijing-online-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Matchmaking and move relay for the Yijing board game app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
