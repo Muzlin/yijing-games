@@ -26,6 +26,16 @@ const ALLOWED_GAMES = new Set([
   'reversi',
   'connect4',
   'connect6',
+  'nineMensMorris',
+  'amazons',
+  'tiger',
+  'chineseCheckers',
+  'flyingChess',
+  'backgammon',
+  'shogi',
+  'tycoon',
+  'doudizhu',
+  'mahjong',
 ]);
 
 const BOT_NAMES = [

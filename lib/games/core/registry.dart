@@ -1,11 +1,21 @@
+import '../impl/amazons_game.dart';
+import '../impl/backgammon_game.dart';
 import '../impl/go_game.dart';
+import '../impl/chinese_checkers_game.dart';
 import '../impl/connect_four_game.dart';
 import '../impl/connect_six_game.dart';
+import '../impl/doudizhu_game.dart';
 import '../impl/draughts_game.dart';
+import '../impl/flying_chess_game.dart';
 import '../impl/jungle_game.dart';
 import '../impl/junqi_game.dart';
+import '../impl/mahjong_game.dart';
+import '../impl/nine_mens_morris_game.dart';
 import '../impl/reversi_game.dart';
 import '../impl/snakes_game.dart';
+import '../impl/shogi_game.dart';
+import '../impl/tiger_game.dart';
+import '../impl/tycoon_game.dart';
 import '../impl/xiangqi_game.dart';
 import '../impl/gomoku_game.dart';
 import 'game_core.dart';
@@ -21,6 +31,26 @@ class GameRegistry {
         return ConnectFourGame();
       case GameKind.connect6:
         return ConnectSixGame();
+      case GameKind.nineMensMorris:
+        return NineMensMorrisGame();
+      case GameKind.amazons:
+        return AmazonsGame();
+      case GameKind.tiger:
+        return TigerGame();
+      case GameKind.chineseCheckers:
+        return ChineseCheckersGame();
+      case GameKind.flyingChess:
+        return FlyingChessGame();
+      case GameKind.backgammon:
+        return BackgammonGame();
+      case GameKind.shogi:
+        return ShogiGame();
+      case GameKind.tycoon:
+        return TycoonGame();
+      case GameKind.doudizhu:
+        return DouDizhuGame();
+      case GameKind.mahjong:
+        return MahjongGame();
       case GameKind.go:
         return GoGame(size: boardSize == 13 ? 13 : 9);
       case GameKind.xiangqi:

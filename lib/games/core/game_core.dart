@@ -14,6 +14,16 @@ enum GameKind {
   reversi,
   connect4,
   connect6,
+  nineMensMorris,
+  amazons,
+  tiger,
+  chineseCheckers,
+  flyingChess,
+  backgammon,
+  shogi,
+  tycoon,
+  doudizhu,
+  mahjong,
 }
 
 enum PlayMode { ai, local, aiVsAi, online }
@@ -120,6 +130,10 @@ abstract class TurnGame {
 
   /// Extra game-specific controls.
   List<TurnGameAction> get actions => const [];
+
+  /// Some card games hide the opponent's hand. The generic screen sets this
+  /// to the local viewer before building the board.
+  void setViewerSide(int side) {}
 }
 
 class TurnGameAction {
@@ -243,6 +257,96 @@ class GameCatalog {
     sideLabels: ['黑方', '白方'],
   );
 
+  static const nineMensMorris = GameMeta(
+    kind: GameKind.nineMensMorris,
+    title: '九子棋',
+    subtitle: '三子成线 · 九子',
+    en: "NINE MEN'S MORRIS",
+    accent: Color(0xFFB78A54),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const amazons = GameMeta(
+    kind: GameKind.amazons,
+    title: '亚马逊棋',
+    subtitle: '皇后 · 射箭封锁',
+    en: 'AMAZONS',
+    accent: Color(0xFFC9855A),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const tiger = GameMeta(
+    kind: GameKind.tiger,
+    title: '老虎棋',
+    subtitle: '虎吃四犬 · 围虎',
+    en: 'TIGER',
+    accent: Color(0xFFD58A4E),
+    sideLabels: ['虎方', '犬方'],
+  );
+
+  static const chineseCheckers = GameMeta(
+    kind: GameKind.chineseCheckers,
+    title: '中国跳棋',
+    subtitle: '连跳 · 十子入营',
+    en: 'CHINESE CHECKERS',
+    accent: Color(0xFF6C9BD8),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const flyingChess = GameMeta(
+    kind: GameKind.flyingChess,
+    title: '飞行棋',
+    subtitle: '掷骰 · 四机归巢',
+    en: 'FLYING CHESS',
+    accent: Color(0xFFD95B4E),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const backgammon = GameMeta(
+    kind: GameKind.backgammon,
+    title: '双陆棋',
+    subtitle: '掷骰 · 十五子离盘',
+    en: 'BACKGAMMON',
+    accent: Color(0xFFB78A54),
+    sideLabels: ['白方', '黑方'],
+  );
+
+  static const shogi = GameMeta(
+    kind: GameKind.shogi,
+    title: '将棋',
+    subtitle: '升变 · 持驹落子',
+    en: 'SHOGI',
+    accent: Color(0xFFC4955A),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const tycoon = GameMeta(
+    kind: GameKind.tycoon,
+    title: '地产大亨',
+    subtitle: '掷骰 · 买地收租',
+    en: 'TYCOON',
+    accent: Color(0xFFD7A74E),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const doudizhu = GameMeta(
+    kind: GameKind.doudizhu,
+    title: '斗地主',
+    subtitle: '二人 · 地主先手',
+    en: 'DOU DIZHU',
+    accent: Color(0xFFD7A74E),
+    sideLabels: ['地主', '农民'],
+  );
+
+  static const mahjong = GameMeta(
+    kind: GameKind.mahjong,
+    title: '麻将',
+    subtitle: '二人 · 摸牌胡',
+    en: 'MAHJONG',
+    accent: Color(0xFF79B36B),
+    sideLabels: ['红方', '蓝方'],
+  );
+
   static const all = [
     chess,
     xiangqi,
@@ -255,6 +359,16 @@ class GameCatalog {
     reversi,
     connect4,
     connect6,
+    nineMensMorris,
+    amazons,
+    tiger,
+    chineseCheckers,
+    flyingChess,
+    backgammon,
+    shogi,
+    tycoon,
+    doudizhu,
+    mahjong,
   ];
 
   static GameMeta of(GameKind kind) =>

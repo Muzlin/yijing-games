@@ -439,6 +439,9 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    game.setViewerSide(
+      config.mode == PlayMode.local ? game.side : config.humanSide,
+    );
     return Scaffold(
       body: PageBackground(
         child: SafeArea(

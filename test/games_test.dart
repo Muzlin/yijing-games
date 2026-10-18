@@ -2,6 +2,16 @@ import 'package:chess_app/games/impl/connect_four_game.dart';
 import 'package:chess_app/games/impl/connect_six_game.dart';
 import 'package:chess_app/games/impl/draughts_game.dart';
 import 'package:chess_app/games/impl/reversi_game.dart';
+import 'package:chess_app/games/impl/nine_mens_morris_game.dart';
+import 'package:chess_app/games/impl/amazons_game.dart';
+import 'package:chess_app/games/impl/tiger_game.dart';
+import 'package:chess_app/games/impl/chinese_checkers_game.dart';
+import 'package:chess_app/games/impl/flying_chess_game.dart';
+import 'package:chess_app/games/impl/backgammon_game.dart';
+import 'package:chess_app/games/impl/shogi_game.dart';
+import 'package:chess_app/games/impl/tycoon_game.dart';
+import 'package:chess_app/games/impl/doudizhu_game.dart';
+import 'package:chess_app/games/impl/mahjong_game.dart';
 import 'package:chess_app/games/impl/go_game.dart';
 import 'package:chess_app/games/impl/gomoku_game.dart';
 import 'package:chess_app/games/impl/jungle_game.dart';
@@ -276,6 +286,201 @@ void main() {
     });
   });
 
+  group('Nine Men\'s Morris', () {
+    test('placement, mill and removal', () {
+      final game = NineMensMorrisGame();
+      expect(game.llmMoves.length, 24);
+      game.apply(const NineMove(-1, 0));
+      game.apply(const NineMove(-1, 8));
+      game.apply(const NineMove(-1, 1));
+      game.apply(const NineMove(-1, 9));
+      game.apply(const NineMove(-1, 2));
+      expect(game.statusText, contains('取子'));
+      expect(game.isLegal(const NineMove(-1, 0)), isFalse);
+      final remove = game.llmMoves.first;
+      expect(game.isLegal(remove), isTrue);
+      game.apply(remove);
+      expect(game.side, 1);
+    });
+
+    test('AI returns a legal move', () {
+      final game = NineMensMorrisGame();
+      final move = game.aiMove(1);
+      expect(game.isLegal(move), isTrue);
+    });
+  });
+
+  group('Amazons', () {
+    test('a complete queen and arrow move is legal', () {
+      final game = AmazonsGame();
+      final move = game.aiMove(1);
+      expect(move, isNotNull);
+      expect(game.isLegal(move), isTrue);
+      game.apply(move);
+      expect(game.board.contains(AmazonsGame.arrowMark), isTrue);
+      expect(game.side, 1);
+    });
+
+    test('AI returns a legal move', () {
+      final game = AmazonsGame();
+      expect(game.isLegal(game.aiMove(1)), isTrue);
+    });
+  });
+
+  group('Tiger', () {
+    test('tiger can jump a dog', () {
+      final game = TigerGame();
+      game.board.fillRange(0, 25, 0);
+      game.board[2 * 5 + 2] = TigerGame.tiger;
+      game.board[2 * 5 + 3] = TigerGame.dog;
+      game.apply(2 * 5 + 4);
+      expect(game.board[2 * 5 + 3], 0);
+      expect(game.board[2 * 5 + 4], TigerGame.tiger);
+      expect(game.winner, 0);
+    });
+
+    test('AI returns a legal move', () {
+      final game = TigerGame();
+      expect(game.isLegal(game.aiMove(1)), isTrue);
+    });
+  });
+
+  group('Chinese Checkers', () {
+    test('initial position and a legal move', () {
+      final game = ChineseCheckersGame();
+      expect(game.board.where((v) => v == 1).length, 10);
+      expect(game.board.where((v) => v == 2).length, 10);
+      final move = game.aiMove(1);
+      expect(move, isNotNull);
+      expect(game.isLegal(move), isTrue);
+      game.apply(move);
+      expect(game.side, 1);
+    });
+
+    test('AI returns a legal move', () {
+      final game = ChineseCheckersGame();
+      expect(game.isLegal(game.aiMove(1)), isTrue);
+    });
+  });
+
+  group('Flying Chess', () {
+    test('AI rolls and applies a turn', () {
+      final game = FlyingChessGame();
+      final turn = game.aiMove(1);
+      expect(turn, isNotNull);
+      expect(game.isLegal(turn), isTrue);
+      game.apply(turn);
+      expect(game.moveCount, 1);
+    });
+
+    test('roll action can be undone when it ends the turn', () {
+      final game = FlyingChessGame();
+      game.primaryAction();
+      expect(game.canUndo, isTrue);
+      game.undo();
+      expect(game.moveCount, 0);
+    });
+  });
+
+  group('Backgammon', () {
+    test('AI rolls and makes a legal checker move', () {
+      final game = BackgammonGame();
+      final move = game.aiMove(1);
+      expect(move, isNotNull);
+      expect(game.isLegal(move), isTrue);
+      game.apply(move);
+      expect(game.moveCount, greaterThan(0));
+    });
+
+    test('AI returns a legal move', () {
+      final game = BackgammonGame();
+      expect(game.isLegal(game.aiMove(1)), isTrue);
+    });
+  });
+
+  group('Shogi', () {
+    test('initial position has legal moves and AI can move', () {
+      final game = ShogiGame();
+      expect(game.llmMoves, isNotEmpty);
+      final move = game.aiMove(1);
+      expect(move, isNotNull);
+      expect(game.isLegal(move), isTrue);
+      game.apply(move);
+      expect(game.moveCount, 1);
+      expect(game.side, 1);
+    });
+
+    test('pawn promotes on entering the promotion zone', () {
+      final game = ShogiGame();
+      game.board.fillRange(0, 81, 0);
+      game.board[8 * 9 + 4] = ShogiGame.king;
+      game.board[0 * 9 + 4] = -ShogiGame.king;
+      game.board[3 * 9 + 0] = ShogiGame.pawn;
+      game.apply(const ShogiMove(3 * 9 + 0, 2 * 9 + 0));
+      expect(game.board[2 * 9 + 0], 9);
+    });
+  });
+
+  group('Tycoon', () {
+    test('AI takes a turn', () {
+      final game = TycoonGame();
+      final turn = game.aiMove(1);
+      expect(turn, isNotNull);
+      expect(game.isLegal(turn), isTrue);
+      game.apply(turn);
+      expect(game.moveCount, 1);
+      expect(game.positions[0] + game.positions[1], greaterThan(0));
+    });
+
+    test('undo restores the previous turn', () {
+      final game = TycoonGame();
+      game.aiMove(1);
+      game.undo();
+      expect(game.moveCount, 0);
+      expect(game.side, 0);
+    });
+  });
+
+  group('Dou Dizhu', () {
+    test('landlord has 20 cards and AI leads legally', () {
+      final game = DouDizhuGame();
+      expect(game.hands[0].length, 20);
+      expect(game.hands[1].length, 17);
+      final move = game.aiMove(1);
+      expect(move, isNotNull);
+      expect(game.isLegal(move), isTrue);
+      game.apply(move);
+      expect(game.side, 1);
+    });
+
+    test('pass is only legal when responding', () {
+      final game = DouDizhuGame();
+      expect(game.isLegal(const DoudizhuPass()), isFalse);
+      final move = game.aiMove(1);
+      game.apply(move);
+      expect(game.isLegal(const DoudizhuPass()), isTrue);
+    });
+  });
+
+  group('Mahjong', () {
+    test('deals and discards with an automatic draw', () {
+      final game = MahjongGame();
+      expect(game.hands[0].length, 14);
+      expect(game.hands[1].length, 13);
+      final tile = game.aiMove(1);
+      expect(tile, isNotNull);
+      expect(game.isLegal(tile), isTrue);
+      game.apply(tile);
+      expect(game.hands[1].length, 14);
+      expect(game.side, 1);
+    });
+
+    test('AI returns a legal tile', () {
+      final game = MahjongGame();
+      expect(game.isLegal(game.aiMove(1)), isTrue);
+    });
+  });
+
   group('AI sanity', () {
     test('every game returns a legal AI move', () {
       final gomoku = GomokuGame()..apply(112);
@@ -315,6 +520,36 @@ void main() {
       final connect6 = ConnectSixGame();
       connect6.apply(9 * 19 + 9);
       expect(connect6.isLegal(connect6.aiMove(1)), isTrue);
+
+      final nine = NineMensMorrisGame();
+      expect(nine.isLegal(nine.aiMove(1)), isTrue);
+
+      final amazons = AmazonsGame();
+      expect(amazons.isLegal(amazons.aiMove(1)), isTrue);
+
+      final tiger = TigerGame();
+      expect(tiger.isLegal(tiger.aiMove(1)), isTrue);
+
+      final chinese = ChineseCheckersGame();
+      expect(chinese.isLegal(chinese.aiMove(1)), isTrue);
+
+      final flying = FlyingChessGame();
+      expect(flying.isLegal(flying.aiMove(1)), isTrue);
+
+      final backgammon = BackgammonGame();
+      expect(backgammon.isLegal(backgammon.aiMove(1)), isTrue);
+
+      final shogi = ShogiGame();
+      expect(shogi.isLegal(shogi.aiMove(1)), isTrue);
+
+      final tycoon = TycoonGame();
+      expect(tycoon.isLegal(tycoon.aiMove(1)), isTrue);
+
+      final dou = DouDizhuGame();
+      expect(dou.isLegal(dou.aiMove(1)), isTrue);
+
+      final mahjong = MahjongGame();
+      expect(mahjong.isLegal(mahjong.aiMove(1)), isTrue);
     });
   });
 

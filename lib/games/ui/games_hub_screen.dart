@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -64,7 +65,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境 · 棋牌合集',
-      applicationVersion: '1.3.0',
+      applicationVersion: '2.0.0',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -83,7 +84,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
       children: const [
         SizedBox(height: 16),
         Text(
-          '11 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
+          '21 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
           'AI 托管与本地 Ollama 大模型。',
           style: TextStyle(height: 1.7, fontSize: 13),
         ),
@@ -190,7 +191,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      '11 款经典棋牌 · 联机 / AI / 双人 / 托管',
+                      '21 款经典棋牌 · 联机 / AI / 双人 / 托管',
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -249,7 +250,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v1.3.0',
+                      '弈境 · 棋牌合集  v2.0.0',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,
@@ -603,6 +604,301 @@ class _GameArt extends StatelessWidget {
                   size: 30,
                 ),
               ),
+            ],
+          ),
+        );
+      case GameKind.nineMensMorris:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Transform.scale(
+                  scale: 1 - i * 0.24,
+                  child: Container(
+                    width: size * 0.78,
+                    height: size * 0.78,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFC9A26B),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              const Positioned(
+                top: 12,
+                child: GameStone(white: false, size: 17),
+              ),
+              const Positioned(
+                bottom: 12,
+                child: GameStone(white: true, size: 17),
+              ),
+            ],
+          ),
+        );
+      case GameKind.amazons:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              GameDisc(
+                label: '♛',
+                color: const Color(0xFF1B1F22),
+                background: const Color(0xFF1B1F22),
+                filled: true,
+                size: 34,
+                fontSize: 20,
+              ),
+              Transform.translate(
+                offset: const Offset(17, 13),
+                child: Transform.rotate(
+                  angle: 0.785,
+                  child: Container(
+                    width: 13,
+                    height: 13,
+                    color: const Color(0xFF4A2E1F),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      case GameKind.chineseCheckers:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 10; i++)
+                Transform.translate(
+                  offset: Offset(
+                    cos(i * pi / 5) * 22,
+                    sin(i * pi / 5) * 22,
+                  ),
+                  child: GameDisc(
+                    label: '',
+                    color: i.isEven
+                        ? const Color(0xFFD95B4E)
+                        : const Color(0xFF6C9BD8),
+                    background: i.isEven
+                        ? const Color(0xFFD95B4E)
+                        : const Color(0xFF6C9BD8),
+                    filled: true,
+                    size: 11,
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.mahjong:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Transform.translate(
+                  offset: Offset((i - 1) * 12.0, (i - 1) * 3.0),
+                  child: Container(
+                    width: 24,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF6F0E4),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: const Color(0xFFC9BFAE)),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      const ['万', '条', '筒'][i],
+                      style: TextStyle(
+                        color: const [
+                          Color(0xFFB53D32),
+                          Color(0xFF3D6B54),
+                          Color(0xFF315B8A),
+                        ][i],
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.doudizhu:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Transform.translate(
+                  offset: Offset((i - 1) * 10.0, (i - 1) * 3.0),
+                  child: Transform.rotate(
+                    angle: (i - 1) * 0.16,
+                    child: Container(
+                      width: 26,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF6F0E4),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFFC9BFAE)),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        const ['3', 'J', '王'][i],
+                        style: TextStyle(
+                          color: i == 2
+                              ? const Color(0xFFB53D32)
+                              : const Color(0xFF1B1F22),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.tycoon:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: size * 0.68,
+                height: size * 0.68,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1C3D35),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFD7A74E), width: 2),
+                ),
+              ),
+              const Icon(Icons.home_work_rounded,
+                  color: Color(0xFFD7A74E), size: 30),
+              Transform.translate(
+                offset: const Offset(20, 20),
+                child: Transform.rotate(
+                  angle: 0.2,
+                  child: const Icon(Icons.casino_rounded,
+                      color: Color(0xFFE7BC4E), size: 24),
+                ),
+              ),
+            ],
+          ),
+        );
+      case GameKind.shogi:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Transform.translate(
+                  offset: Offset((i - 1) * 18.0, (i.isEven ? -6 : 6).toDouble()),
+                  child: GameDisc(
+                    label: const ['歩', '金', '玉'][i],
+                    color: const Color(0xFF1B1F22),
+                    background: const Color(0xFFE7C994),
+                    size: 26,
+                    fontSize: 13,
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.backgammon:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: size * 0.78,
+                height: size * 0.58,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5A3523),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFC9A26B)),
+                ),
+              ),
+              for (var i = 0; i < 6; i++)
+                Positioned(
+                  left: size * 0.15 + i * size * 0.115,
+                  bottom: size * 0.24 + (i.isEven ? 0 : 5),
+                  child: GameStone(white: i.isEven, size: 18),
+                ),
+            ],
+          ),
+        );
+      case GameKind.flyingChess:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 12; i++)
+                Transform.rotate(
+                  angle: i * pi / 6,
+                  child: Transform.translate(
+                    offset: const Offset(0, -24),
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: i.isEven
+                            ? const Color(0xFFD95B4E)
+                            : const Color(0xFF6C9BD8),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+              const Icon(Icons.flight_rounded, color: Color(0xFFE7BC6C), size: 24),
+            ],
+          ),
+        );
+      case GameKind.tiger:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              GameDisc(
+                label: '虎',
+                color: const Color(0xFFD95B4E),
+                background: const Color(0xFFD95B4E),
+                filled: true,
+                size: 38,
+                fontSize: 20,
+              ),
+              for (final p in const [Offset(-22, 15), Offset(0, 21), Offset(22, 15)])
+                Transform.translate(
+                  offset: p,
+                  child: GameDisc(
+                    label: '犬',
+                    color: const Color(0xFFE0B76A),
+                    background: const Color(0xFFE0B76A),
+                    filled: true,
+                    size: 20,
+                    fontSize: 10,
+                  ),
+                ),
             ],
           ),
         );

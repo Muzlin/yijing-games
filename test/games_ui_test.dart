@@ -35,6 +35,16 @@ void main() {
       '黑白棋',
       '四子棋',
       '六子棋',
+      '九子棋',
+      '亚马逊棋',
+      '老虎棋',
+      '中国跳棋',
+      '飞行棋',
+      '双陆棋',
+      '将棋',
+      '地产大亨',
+      '斗地主',
+      '麻将',
     ]) {
       await tester.ensureVisible(find.text(title));
       await tester.pump(const Duration(milliseconds: 100));

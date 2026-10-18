@@ -3,6 +3,16 @@ import 'package:chess_app/games/impl/connect_four_game.dart';
 import 'package:chess_app/games/impl/connect_six_game.dart';
 import 'package:chess_app/games/impl/draughts_game.dart';
 import 'package:chess_app/games/impl/reversi_game.dart';
+import 'package:chess_app/games/impl/nine_mens_morris_game.dart';
+import 'package:chess_app/games/impl/amazons_game.dart';
+import 'package:chess_app/games/impl/tiger_game.dart';
+import 'package:chess_app/games/impl/chinese_checkers_game.dart';
+import 'package:chess_app/games/impl/flying_chess_game.dart';
+import 'package:chess_app/games/impl/backgammon_game.dart';
+import 'package:chess_app/games/impl/shogi_game.dart';
+import 'package:chess_app/games/impl/tycoon_game.dart';
+import 'package:chess_app/games/impl/doudizhu_game.dart';
+import 'package:chess_app/games/impl/mahjong_game.dart';
 import 'package:chess_app/games/impl/go_game.dart';
 import 'package:chess_app/games/impl/gomoku_game.dart';
 import 'package:chess_app/games/impl/jungle_game.dart';
@@ -23,6 +33,16 @@ void main() {
     'reversi': () => ReversiGame(),
     'connect4': () => ConnectFourGame(),
     'connect6': () => ConnectSixGame(),
+    'nineMensMorris': () => NineMensMorrisGame(),
+    'amazons': () => AmazonsGame(),
+    'tiger': () => TigerGame(),
+    'chineseCheckers': () => ChineseCheckersGame(),
+    'flyingChess': () => FlyingChessGame(),
+    'backgammon': () => BackgammonGame(),
+    'shogi': () => ShogiGame(),
+    'tycoon': () => TycoonGame(),
+    'doudizhu': () => DouDizhuGame(),
+    'mahjong': () => MahjongGame(),
   };
 
   for (final entry in games.entries) {
