@@ -69,6 +69,32 @@ void main() {
     }
   });
 
+  testWidgets('rules sheet opens from a game page', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const ChessApp());
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.ensureVisible(find.text('五子棋'));
+    await tester.tap(find.text('五子棋'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('双人同屏'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('开始对局'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.byIcon(Icons.menu_book_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('知道了'), findsOneWidget);
+    expect(find.textContaining('五子连珠'), findsWidgets);
+    await tester.tap(find.text('知道了'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('gomoku places stones by tapping the board', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;

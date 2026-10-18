@@ -453,6 +453,22 @@ class _TycoonPainter extends CustomPainter {
         canvas,
         Offset(r.center.dx - label.width / 2, r.top + cell * 0.08),
       );
+      if (owner >= 0) {
+        final mark = TextPainter(
+          text: TextSpan(
+            text: owner == 0 ? '红' : '蓝',
+            style: TextStyle(
+              color: owner == 0
+                  ? const Color(0xFFB53D32)
+                  : const Color(0xFF315B8A),
+              fontSize: cell * 0.15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        mark.paint(canvas, Offset(r.right - mark.width - 3, r.top + 2));
+      }
       if (space.type == 1) {
         final price = TextPainter(
           text: TextSpan(
@@ -494,7 +510,7 @@ class _TycoonPainter extends CustomPainter {
     );
     final info = TextPainter(
       text: TextSpan(
-        text: '红 ¥${game.cash[0]}\n蓝 ¥${game.cash[1]}\n\n骰子 ${game._lastDice == 0 ? '—' : game._lastDice}',
+        text: '红 ¥${game.cash[0]}\n蓝 ¥${game.cash[1]}\n\n${game.sideName(game.side)}回合 · 骰子 ${game._lastDice == 0 ? '—' : game._lastDice}',
         style: TextStyle(
           color: const Color(0xFFE8D3A9),
           fontSize: cell * 0.19,

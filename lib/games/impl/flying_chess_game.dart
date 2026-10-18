@@ -562,6 +562,38 @@ class _FlyingPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
     )..layout();
     text.paint(canvas, center - Offset(text.width / 2, text.height / 2));
+    if (game._dice > 0) {
+      final dice = TextPainter(
+        text: TextSpan(
+          text: '🎲 ${game._dice}',
+          style: TextStyle(
+            color: const Color(0xFFE7BC6C),
+            fontSize: cell * 0.85,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      dice.paint(
+        canvas,
+        center + Offset(-dice.width / 2, cell * 0.95),
+      );
+      final hint = TextPainter(
+        text: TextSpan(
+          text: game._awaiting ? '选择飞机' : '继续掷骰',
+          style: TextStyle(
+            color: const Color(0xFFB9A58A),
+            fontSize: cell * 0.32,
+            letterSpacing: 2,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      hint.paint(
+        canvas,
+        center + Offset(-hint.width / 2, cell * 1.85),
+      );
+    }
   }
 
   @override

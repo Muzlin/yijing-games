@@ -437,6 +437,10 @@ class ConnectFourBoard extends StatelessWidget {
                       cellW: cellW,
                       cellH: cellH,
                       discFraction: disc / min(cellW, cellH),
+                      legalColumns: [
+                        for (var c = 0; c < 7; c++)
+                          if (game.isLegal(c)) c,
+                      ],
                     ),
                   ),
                 ),
@@ -455,12 +459,14 @@ class _ConnectPainter extends CustomPainter {
   final double cellW;
   final double cellH;
   final double discFraction;
+  final List<int> legalColumns;
 
   _ConnectPainter({
     required this.game,
     required this.cellW,
     required this.cellH,
     required this.discFraction,
+    required this.legalColumns,
   });
 
   @override
@@ -478,6 +484,14 @@ class _ConnectPainter extends CustomPainter {
           Paint()..color = const Color(0xFF142A44),
         );
       }
+    }
+    for (final column in legalColumns) {
+      final x = (column + 0.5) * cellW;
+      canvas.drawCircle(
+        Offset(x, cellH * 0.11),
+        min(cellW, cellH) * 0.055,
+        Paint()..color = const Color(0xFFE7BC6C).withValues(alpha: 0.55),
+      );
     }
     if (game._lastMove >= 0) {
       final row = game._lastMove ~/ 7;

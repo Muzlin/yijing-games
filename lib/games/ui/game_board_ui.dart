@@ -6,12 +6,14 @@ class GameBoardFrame extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
   final double radius;
+  final Color accent;
 
   const GameBoardFrame({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(6),
     this.radius = 18,
+    this.accent = AppColors.gold,
   });
 
   @override
@@ -26,7 +28,7 @@ class GameBoardFrame extends StatelessWidget {
           colors: [Color(0xFF34473F), Color(0xFF16211E)],
         ),
         border: Border.all(
-          color: AppColors.gold.withValues(alpha: 0.28),
+          color: accent.withValues(alpha: 0.38),
         ),
         boxShadow: [
           BoxShadow(
@@ -35,7 +37,7 @@ class GameBoardFrame extends StatelessWidget {
             offset: const Offset(0, 14),
           ),
           BoxShadow(
-            color: AppColors.gold.withValues(alpha: 0.05),
+            color: accent.withValues(alpha: 0.12),
             blurRadius: 40,
             spreadRadius: 2,
           ),

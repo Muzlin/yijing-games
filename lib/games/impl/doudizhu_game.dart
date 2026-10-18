@@ -494,6 +494,19 @@ class _DouDizhuBoardState extends State<DouDizhuBoard> {
                     '${game.sideName(1 - viewer)} · ${game.hands[1 - viewer].length} 张',
                     style: const TextStyle(fontSize: 10, color: Color(0xFFB9A58A)),
                   ),
+                  const SizedBox(width: 8),
+                  for (var i = 0; i < game.hands[1 - viewer].length && i < 9; i++)
+                    Container(
+                      width: 9,
+                      height: 14,
+                      margin: const EdgeInsets.only(right: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6A4A2B),
+                        borderRadius: BorderRadius.circular(2),
+                        border: Border.all(
+                            color: const Color(0xFFE7BC6C).withValues(alpha: 0.35)),
+                      ),
+                    ),
                   const Spacer(),
                   Text(
                     game.isOver ? game.resultTitle : '${game.sideName(game.side)}回合',
@@ -505,7 +518,11 @@ class _DouDizhuBoardState extends State<DouDizhuBoard> {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
+              Text(
+                game._lastCards.isEmpty ? '自由出牌' : '上家出牌',
+                style: const TextStyle(fontSize: 9, color: Color(0xFF7F968B)),
+              ),
               Expanded(
                 child: Center(
                   child: game._lastCards.isEmpty
@@ -522,9 +539,19 @@ class _DouDizhuBoardState extends State<DouDizhuBoard> {
                         ),
                 ),
               ),
-              Text(
-                '你的手牌 · ${hand.length} 张',
-                style: const TextStyle(fontSize: 9, color: Color(0xFF7F968B)),
+              Row(
+                children: [
+                  Text(
+                    '你的手牌 · ${hand.length} 张',
+                    style: const TextStyle(fontSize: 9, color: Color(0xFF7F968B)),
+                  ),
+                  const Spacer(),
+                  if (selected.isNotEmpty)
+                    Text(
+                      '已选 ${selected.length} 张',
+                      style: const TextStyle(fontSize: 9, color: Color(0xFFE7BC6C)),
+                    ),
+                ],
               ),
               const SizedBox(height: 4),
               SizedBox(
@@ -564,7 +591,7 @@ class _DouDizhuBoardState extends State<DouDizhuBoard> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: canAct
+                      onPressed: canAct && game.isLegal(const DoudizhuPass())
                           ? () {
                               widget.onMove(const DoudizhuPass());
                               setState(selected.clear);

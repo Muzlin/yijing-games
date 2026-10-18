@@ -309,6 +309,7 @@ class GameCatalog {
     en: 'BACKGAMMON',
     accent: Color(0xFFB78A54),
     sideLabels: ['白方', '黑方'],
+    aspectRatio: 1.3,
   );
 
   static const shogi = GameMeta(

@@ -381,6 +381,21 @@ class MahjongBoard extends StatelessWidget {
                     '${game.sideName(1 - viewerSide)} · ${game.hands[1 - viewerSide].length} 张',
                     style: const TextStyle(fontSize: 10, color: Color(0xFFB9A58A)),
                   ),
+                  const SizedBox(width: 8),
+                  for (var i = 0;
+                      i < game.hands[1 - viewerSide].length && i < 10;
+                      i++)
+                    Container(
+                      width: 9,
+                      height: 14,
+                      margin: const EdgeInsets.only(right: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6A4A2B),
+                        borderRadius: BorderRadius.circular(2),
+                        border: Border.all(
+                            color: const Color(0xFFE7BC6C).withValues(alpha: 0.35)),
+                      ),
+                    ),
                   const Spacer(),
                   Text(
                     '牌墙 ${game._wall.length}',
@@ -388,7 +403,11 @@ class MahjongBoard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
+              Text(
+                game._lastDiscard == null ? '等待上家出牌' : '上家打出',
+                style: const TextStyle(fontSize: 9, color: Color(0xFF7F968B)),
+              ),
               Expanded(
                 child: Center(
                   child: game._lastDiscard == null

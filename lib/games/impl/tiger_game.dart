@@ -420,6 +420,7 @@ class TigerBoard extends StatelessWidget {
                       game: game,
                       cell: cell,
                       flipped: flipped,
+                      targets: game._legalFor(game.side),
                     ),
                   ),
                 ),
@@ -437,8 +438,14 @@ class _TigerPainter extends CustomPainter {
   final TigerGame game;
   final double cell;
   final bool flipped;
+  final List<int> targets;
 
-  _TigerPainter({required this.game, required this.cell, required this.flipped});
+  _TigerPainter({
+    required this.game,
+    required this.cell,
+    required this.flipped,
+    required this.targets,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -458,6 +465,25 @@ class _TigerPainter extends CustomPainter {
     for (var i = 1; i < 5; i++) {
       canvas.drawLine(Offset(i * cell, 0), Offset(i * cell, size.height), line);
       canvas.drawLine(Offset(0, i * cell), Offset(size.width, i * cell), line);
+    }
+    for (final index in targets) {
+      final row = index ~/ 5;
+      final col = index % 5;
+      final vx = flipped ? 4 - col : col;
+      final vy = flipped ? 4 - row : row;
+      canvas.drawCircle(
+        Offset((vx + 0.5) * cell, (vy + 0.5) * cell),
+        cell * 0.18,
+        Paint()..color = const Color(0xFF3D6B54).withValues(alpha: 0.42),
+      );
+      canvas.drawCircle(
+        Offset((vx + 0.5) * cell, (vy + 0.5) * cell),
+        cell * 0.28,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = const Color(0xFF3D6B54).withValues(alpha: 0.65),
+      );
     }
     if (game._last != null) {
       final index = game._last!;

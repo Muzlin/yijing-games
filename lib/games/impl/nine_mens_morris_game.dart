@@ -440,10 +440,29 @@ class NineMensMorrisBoard extends StatefulWidget {
 
 class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
   int? selected;
+  List<int> targets = const [];
+
+  List<int> _activeTargets() {
+    final game = widget.game;
+    if (game._pendingRemove) {
+      return [for (var i = 0; i < 24; i++) if (game._canRemove(i)) i];
+    }
+    if (game.placed[game.side] < 9) {
+      return [for (var i = 0; i < 24; i++) if (game.board[i] == 0) i];
+    }
+    if (selected != null) {
+      return [
+        for (var i = 0; i < 24; i++)
+          if (game.isLegal(NineMove(selected!, i))) i,
+      ];
+    }
+    return const [];
+  }
 
   @override
   Widget build(BuildContext context) {
     final game = widget.game;
+    final activeTargets = _activeTargets();
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = min(constraints.maxWidth, constraints.maxHeight);
@@ -501,6 +520,8 @@ class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
                       flipped: widget.flipped,
                       last: game._last,
                       selected: selected,
+                      targets: activeTargets,
+                      removal: game._pendingRemove,
                     ),
                   ),
                 ),
@@ -523,18 +544,27 @@ class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
       if (game.board[index] == 0) widget.onMove(NineMove(-1, index));
       return;
     }
-    if (selected != null) {
-      final move = NineMove(selected!, index);
-      if (game.isLegal(move)) {
-        widget.onMove(move);
-        setState(() => selected = null);
-        return;
-      }
+    if (selected != null && targets.contains(index)) {
+      widget.onMove(NineMove(selected!, index));
+      setState(() {
+        selected = null;
+        targets = const [];
+      });
+      return;
     }
     if (game.board[index] == game.side + 1) {
-      setState(() => selected = index);
+      setState(() {
+        selected = index;
+        targets = [
+          for (var i = 0; i < 24; i++)
+            if (game.isLegal(NineMove(index, i))) i,
+        ];
+      });
     } else {
-      setState(() => selected = null);
+      setState(() {
+        selected = null;
+        targets = const [];
+      });
     }
   }
 }
@@ -545,6 +575,8 @@ class _NinePainter extends CustomPainter {
   final bool flipped;
   final int? last;
   final int? selected;
+  final List<int> targets;
+  final bool removal;
 
   _NinePainter({
     required this.cell,
@@ -552,6 +584,8 @@ class _NinePainter extends CustomPainter {
     required this.flipped,
     required this.last,
     required this.selected,
+    required this.targets,
+    required this.removal,
   });
 
   @override
@@ -580,6 +614,24 @@ class _NinePainter extends CustomPainter {
     final pointPaint = Paint()..color = const Color(0xFF4A301B);
     for (var i = 0; i < 24; i++) {
       canvas.drawCircle(at(i), cell * 0.075, pointPaint);
+    }
+    for (final index in targets) {
+      canvas.drawCircle(
+        at(index),
+        cell * 0.20,
+        Paint()
+          ..color = (removal ? const Color(0xFFB53D32) : const Color(0xFF3D6B54))
+              .withValues(alpha: 0.55),
+      );
+      canvas.drawCircle(
+        at(index),
+        cell * 0.30,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = (removal ? const Color(0xFFB53D32) : const Color(0xFF3D6B54))
+              .withValues(alpha: 0.8),
+      );
     }
     if (selected != null) {
       canvas.drawCircle(

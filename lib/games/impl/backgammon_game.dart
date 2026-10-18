@@ -723,6 +723,45 @@ class _BackgammonPainter extends CustomPainter {
             side == 0 ? height * 0.25 : height * 0.70),
       );
     }
+    if (game._dice.isNotEmpty) {
+      final diceText = TextPainter(
+        text: TextSpan(
+          text: '🎲 ${game._dice.join('  ')}',
+          style: TextStyle(
+            color: const Color(0xFFE7BC6C),
+            fontSize: pointW * 0.34,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final box = Rect.fromCenter(
+        center: Offset(width * 0.5, height * 0.5),
+        width: diceText.width + pointW * 0.5,
+        height: diceText.height + pointW * 0.35,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(box, Radius.circular(pointW * 0.18)),
+        Paint()..color = const Color(0xFF1A0E09).withValues(alpha: 0.82),
+      );
+      diceText.paint(
+        canvas,
+        Offset(box.center.dx - diceText.width / 2,
+            box.center.dy - diceText.height / 2),
+      );
+    }
+    final barLabel = TextPainter(
+      text: TextSpan(
+        text: '中线',
+        style: TextStyle(
+          color: const Color(0xFFB9A58A).withValues(alpha: 0.7),
+          fontSize: pointW * 0.16,
+          letterSpacing: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    barLabel.paint(canvas, Offset(left + barW * 0.30, height * 0.5 + pointW * 0.8));
     for (final index in targets) {
       final c = index < 0 ? Offset(left + barW * 1.0, height * 0.5) : center(index);
       canvas.drawCircle(

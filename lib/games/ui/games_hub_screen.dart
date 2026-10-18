@@ -26,7 +26,29 @@ class GamesHubScreen extends StatefulWidget {
   State<GamesHubScreen> createState() => _GamesHubScreenState();
 }
 
+enum _HubFilter { all, classic, fresh, cards }
+
 class _GamesHubScreenState extends State<GamesHubScreen> {
+  _HubFilter _filter = _HubFilter.all;
+
+  bool _isTable(GameKind kind) =>
+      kind == GameKind.doudizhu ||
+      kind == GameKind.mahjong ||
+      kind == GameKind.tycoon ||
+      kind == GameKind.flyingChess ||
+      kind == GameKind.backgammon;
+
+  bool _matchesFilter(GameMeta meta) {
+    final kind = meta.kind;
+    final isClassic = kind.index <= GameKind.gomoku.index;
+    return switch (_filter) {
+      _HubFilter.all => true,
+      _HubFilter.classic => isClassic,
+      _HubFilter.fresh => !isClassic && !_isTable(kind),
+      _HubFilter.cards => _isTable(kind),
+    };
+  }
+
   @override
   void initState() {
     super.initState();
@@ -65,7 +87,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境 · 棋牌合集',
-      applicationVersion: '2.0.0',
+      applicationVersion: '2.0.1',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -198,18 +220,53 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                         letterSpacing: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 18),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (final filter in _HubFilter.values) ...[
+                            _FilterChip(
+                              label: switch (filter) {
+                                _HubFilter.all => '全部',
+                                _HubFilter.classic => '经典棋',
+                                _HubFilter.fresh => '策略新棋',
+                                _HubFilter.cards => '牌桌 / 掷骰',
+                              },
+                              count: GameCatalog.all
+                                  .where((meta) => switch (filter) {
+                                        _HubFilter.all => true,
+                                        _HubFilter.classic =>
+                                          meta.kind.index <= GameKind.gomoku.index,
+                                        _HubFilter.fresh =>
+                                          meta.kind.index > GameKind.gomoku.index &&
+                                              !_isTable(meta.kind),
+                                        _HubFilter.cards => _isTable(meta.kind),
+                                      })
+                                  .length,
+                              selected: _filter == filter,
+                              accent: AppColors.gold,
+                              onTap: () => setState(() => _filter = filter),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
                     LayoutBuilder(
                       builder: (context, constraints) {
                         final width = constraints.maxWidth;
                         final columns = width > 780 ? 4 : (width > 560 ? 3 : 2);
                         final cardWidth =
                             (width - 12 * (columns - 1)) / columns;
+                        final games =
+                            GameCatalog.all.where(_matchesFilter).toList();
                         return Wrap(
                           spacing: 12,
                           runSpacing: 12,
                           children: [
-                            for (final meta in GameCatalog.all)
+                            for (final meta in games)
                               SizedBox(
                                 width: cardWidth,
                                 child: _GameCard(
@@ -250,7 +307,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v2.0.0',
+                      '弈境 · 棋牌合集  v2.0.1',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,
@@ -337,6 +394,67 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
           tooltip: AppSound.enabled ? '关闭音效' : '开启音效',
         ),
       ],
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool selected;
+  final Color accent;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.accent,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? accent.withValues(alpha: 0.14)
+              : AppColors.surface.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? accent.withValues(alpha: 0.55)
+                : AppColors.line,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: selected ? accent : AppColors.muted,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 9,
+                color: selected
+                    ? accent.withValues(alpha: 0.75)
+                    : AppColors.muted.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

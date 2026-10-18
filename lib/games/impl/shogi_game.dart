@@ -338,6 +338,7 @@ class ShogiGame extends TurnGame {
   @override
   String get statusText {
     if (_winner != null) return resultTitle;
+    if (_inCheck(_side)) return '王手！${sideName(_side)}应将';
     return '${sideName(_side)}行棋';
   }
 
@@ -717,6 +718,7 @@ class _ShogiBoardState extends State<ShogiBoard> {
                             flipped: widget.flipped,
                             selected: selected,
                             targets: targets,
+                            inCheck: game._inCheck(game.side),
                           ),
                         ),
                       ),
@@ -778,6 +780,7 @@ class _ShogiPainter extends CustomPainter {
   final bool flipped;
   final int? selected;
   final List<int> targets;
+  final bool inCheck;
 
   _ShogiPainter({
     required this.game,
@@ -785,6 +788,7 @@ class _ShogiPainter extends CustomPainter {
     required this.flipped,
     required this.selected,
     required this.targets,
+    required this.inCheck,
   });
 
   @override
@@ -799,6 +803,15 @@ class _ShogiPainter extends CustomPainter {
           colors: [Color(0xFFE7C994), Color(0xFFC89A5E)],
         ).createShader(rect),
     );
+    if (inCheck) {
+      canvas.drawRect(
+        rect.deflate(1),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3
+          ..color = const Color(0xFFB53D32).withValues(alpha: 0.75),
+      );
+    }
     final grid = Paint()
       ..color = const Color(0xFF6A4A2B).withValues(alpha: 0.7)
       ..strokeWidth = 1;

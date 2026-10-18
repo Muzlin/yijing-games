@@ -11,6 +11,7 @@ import '../../ui/theme.dart';
 import '../core/game_core.dart';
 import '../core/registry.dart';
 import 'game_board_ui.dart';
+import 'game_rules_text.dart';
 
 class GenericGameScreen extends StatefulWidget {
   final GameMatchConfig config;
@@ -42,6 +43,8 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
   bool manualOverride = false;
   bool flipped = false;
   Object? hint;
+  String? _lastMoveText;
+  int? _lastMoveSide;
   int? _forcedWinner;
   String? _forcedReason;
   bool _resultReported = false;
@@ -111,6 +114,8 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     _aiGeneration++;
     thinking = false;
     hint = null;
+    _lastMoveText = null;
+    _lastMoveSide = null;
     _applyingRemote = true;
     game.loadJson(Map<String, Object?>.from(raw));
     _applyingRemote = false;
@@ -216,7 +221,10 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
 
     thinking = false;
     if (move != null && !_isOver && game.isLegal(move)) {
+      final mover = game.side;
       game.apply(move);
+      _lastMoveText = game.describeMove(move);
+      _lastMoveSide = mover;
       boardVersion++;
       AppSound.move();
     }
@@ -253,7 +261,10 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
 
   void _onBoardMove(Object? move) {
     if (!_canHumanMove || !game.isLegal(move)) return;
+    final mover = game.side;
     game.apply(move);
+    _lastMoveText = game.describeMove(move);
+    _lastMoveSide = mover;
     hint = null;
     boardVersion++;
     if (manualOverride) manualOverride = false;
@@ -264,7 +275,10 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
 
   void _primaryAction() {
     if (!_canHumanMove) return;
+    final mover = game.side;
     game.primaryAction();
+    _lastMoveText = null;
+    _lastMoveSide = mover;
     hint = null;
     boardVersion++;
     if (manualOverride) manualOverride = false;
@@ -277,7 +291,10 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     if (!_canHumanMove) return;
     final move = game.aiMove(3);
     if (move == null || !game.isLegal(move)) return;
+    final mover = game.side;
     game.apply(move);
+    _lastMoveText = game.describeMove(move);
+    _lastMoveSide = mover;
     hint = null;
     boardVersion++;
     AppSound.move();
@@ -289,6 +306,8 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     if (_isOnlineReal) return;
     _aiGeneration++;
     thinking = false;
+    _lastMoveText = null;
+    _lastMoveSide = null;
     hint = null;
     if (config.mode == PlayMode.aiVsAi) {
       paused = true;
@@ -357,6 +376,8 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     paused = false;
     manualOverride = false;
     hint = null;
+    _lastMoveText = null;
+    _lastMoveSide = null;
     _forcedWinner = null;
     _forcedReason = null;
     _resultReported = false;
@@ -404,6 +425,99 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     } else if (mounted) {
       Navigator.of(context).pop();
     }
+  }
+
+  void _showRules() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        constraints: const BoxConstraints(maxWidth: 620),
+        margin: const EdgeInsets.fromLTRB(12, 40, 12, 16),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceHigh,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: config.meta.accent.withValues(alpha: 0.35)),
+          boxShadow: const [
+            BoxShadow(color: Colors.black54, blurRadius: 40, offset: Offset(0, 18)),
+          ],
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: config.meta.accent.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      config.meta.en,
+                      style: TextStyle(
+                        fontSize: 9,
+                        letterSpacing: 1.6,
+                        color: config.meta.accent,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    color: AppColors.muted,
+                    tooltip: '关闭',
+                  ),
+                ],
+              ),
+              Text(
+                config.meta.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                config.meta.subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.muted,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SelectableText(
+                gameRulesText(config.meta.kind),
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.75,
+                  color: AppColors.ivory,
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: config.meta.accent,
+                    foregroundColor: const Color(0xFF101B1E),
+                  ),
+                  child: const Text('知道了'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   String get _modeLabel {
@@ -531,6 +645,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                   width: boardW,
                   height: boardH,
                   child: GameBoardFrame(
+                    accent: config.meta.accent,
                     child: KeyedSubtree(
                       key: ValueKey('${boardVersion}_$flipped'),
                       child: game.buildBoard(
@@ -617,6 +732,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                       width: boardW,
                       height: boardH,
                       child: GameBoardFrame(
+                        accent: config.meta.accent,
                         child: KeyedSubtree(
                           key: ValueKey('${boardVersion}_$flipped'),
                           child: game.buildBoard(
@@ -651,15 +767,16 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                       SizedBox(height: 62, child: _buildControls()),
                       const SizedBox(height: 12),
                       Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color:
-                                AppColors.surface.withValues(alpha: 0.62),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.line),
-                          ),
-                          child: Column(
+                        child: SingleChildScrollView(
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.surface.withValues(alpha: 0.62),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.line),
+                            ),
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
@@ -677,6 +794,10 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                               _infoRow('模式', _modeLabel),
                               const SizedBox(height: 8),
                               _infoRow('手数', '${game.moveCount}'),
+                              if (_lastMoveText != null) ...[
+                                const SizedBox(height: 8),
+                                _infoRow('上一步', _lastMoveText!),
+                              ],
                               if (hint != null) ...[
                                 const SizedBox(height: 8),
                                 const Text(
@@ -688,6 +809,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                                 ),
                               ],
                             ],
+                          ),
                           ),
                         ),
                       ),
@@ -751,28 +873,57 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _modeLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1.4,
-                  color: AppColors.muted,
-                ),
+              Row(
+                children: [
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: config.meta.accent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    config.meta.title,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                      color: AppColors.ivory,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 7),
+                  Flexible(
+                    child: Text(
+                      '· $_modeLabel',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 9.5,
+                        letterSpacing: 0.8,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 2),
               Row(
                 children: [
                   Flexible(
-                    child: Text(
-                      _statusText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: _isOver ? AppColors.gold : AppColors.ivory,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      child: Text(
+                        _statusText,
+                        key: ValueKey(_statusText),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: _isOver ? AppColors.gold : AppColors.ivory,
+                        ),
                       ),
                     ),
                   ),
@@ -802,6 +953,11 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
             ],
           ),
         ),
+        _CircleButton(
+          icon: Icons.menu_book_rounded,
+          onTap: _showRules,
+        ),
+        const SizedBox(width: 7),
         _CircleButton(
           icon: Icons.flip_rounded,
           onTap: () => setState(() => flipped = !flipped),
@@ -840,7 +996,9 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                         ? '你来帮它走一步'
                         : active
                             ? (isHuman ? '该你落子' : '正在落子')
-                            : '等待';
+                            : _lastMoveSide == side && _lastMoveText != null
+                                ? '上一步 · ${_lastMoveText!}'
+                                : '等待';
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

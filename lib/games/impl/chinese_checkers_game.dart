@@ -556,6 +556,31 @@ class _ChinesePainter extends CustomPainter {
           ..color = const Color(0xFFE7BC6C).withValues(alpha: 0.20),
       );
     }
+    void label(String text, Offset p, Color color) {
+      final tp = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: TextStyle(
+            color: color.withValues(alpha: 0.55),
+            fontSize: cell * 0.5,
+            letterSpacing: 3,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, p - Offset(tp.width / 2, tp.height / 2));
+    }
+
+    if (!flipped) {
+      label('红营', Offset(centerX, padY + cell * 0.2), const Color(0xFFD95B4E));
+      label('蓝营', Offset(centerX, size.height - padY + cell * 0.2),
+          const Color(0xFF6C9BD8));
+    } else {
+      label('蓝营', Offset(centerX, padY + cell * 0.2), const Color(0xFF6C9BD8));
+      label('红营', Offset(centerX, size.height - padY + cell * 0.2),
+          const Color(0xFFD95B4E));
+    }
     for (final index in targets) {
       canvas.drawCircle(
         at(index),
