@@ -1,4 +1,5 @@
 import 'package:chess_app/ai/ai_bridge.dart';
+import 'package:chess_app/games/impl/connect_six_game.dart';
 import 'package:chess_app/games/impl/gomoku_game.dart';
 import 'package:chess_app/games/ui/generic_game_screen.dart';
 import 'package:chess_app/main.dart';
@@ -31,6 +32,9 @@ void main() {
       '蛇棋',
       '围棋',
       '五子棋',
+      '黑白棋',
+      '四子棋',
+      '六子棋',
     ]) {
       await tester.ensureVisible(find.text(title));
       await tester.pump(const Duration(milliseconds: 100));
@@ -83,6 +87,36 @@ void main() {
     await tester.tapAt(center + Offset(cell * 2, cell * 2));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('黑方落子'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('connect six keeps the turn for the second stone', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const ChessApp());
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.ensureVisible(find.text('六子棋'));
+    await tester.tap(find.text('六子棋'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('双人同屏'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.text('开始对局'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+
+    final board = tester.getRect(find.byType(ConnectSixBoard));
+    await tester.tapAt(board.center);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('白方落子 · 可下 2 手'), findsOneWidget);
+    await tester.tapAt(board.center + const Offset(20, 0));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('白方落子 · 本回合最后一手'), findsOneWidget);
+    await tester.tapAt(board.center + const Offset(40, 0));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('黑方落子 · 可下 2 手'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

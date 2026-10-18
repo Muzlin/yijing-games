@@ -64,7 +64,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境 · 棋牌合集',
-      applicationVersion: '1.2.4',
+      applicationVersion: '1.3.0',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -83,7 +83,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
       children: const [
         SizedBox(height: 16),
         Text(
-          '8 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
+          '11 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
           'AI 托管与本地 Ollama 大模型。',
           style: TextStyle(height: 1.7, fontSize: 13),
         ),
@@ -190,7 +190,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      '8 款经典棋牌 · 联机 / AI / 双人 / 托管',
+                      '11 款经典棋牌 · 联机 / AI / 双人 / 托管',
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -249,7 +249,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v1.2.4',
+                      '弈境 · 棋牌合集  v1.3.0',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,
@@ -550,6 +550,73 @@ class _GameArt extends StatelessWidget {
                 Transform.translate(
                   offset: Offset(-18.0 + i * 9, (i.isEven ? -4 : 4).toDouble()),
                   child: GameStone(white: i.isOdd, size: 17),
+                ),
+            ],
+          ),
+        );
+      case GameKind.reversi:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.translate(
+                offset: const Offset(-7, -4),
+                child: GameStone(white: true, size: 34),
+              ),
+              Transform.translate(
+                offset: const Offset(8, 5),
+                child: GameStone(white: false, size: 34),
+              ),
+            ],
+          ),
+        );
+      case GameKind.connect4:
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: const Color(0xFF203A5B),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.translate(
+                offset: const Offset(-7, 5),
+                child: GameDisc(
+                  label: '',
+                  color: const Color(0xFFD95B4E),
+                  background: const Color(0xFFD95B4E),
+                  filled: true,
+                  size: 30,
+                ),
+              ),
+              Transform.translate(
+                offset: const Offset(8, -5),
+                child: GameDisc(
+                  label: '',
+                  color: const Color(0xFFE9C45C),
+                  background: const Color(0xFFE9C45C),
+                  filled: true,
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
+        );
+      case GameKind.connect6:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 6; i++)
+                Transform.translate(
+                  offset: Offset(-20.0 + i * 8, (i.isEven ? -3 : 3).toDouble()),
+                  child: GameStone(white: i.isOdd, size: 15),
                 ),
             ],
           ),

@@ -1,7 +1,10 @@
 import '../impl/go_game.dart';
+import '../impl/connect_four_game.dart';
+import '../impl/connect_six_game.dart';
 import '../impl/draughts_game.dart';
 import '../impl/jungle_game.dart';
 import '../impl/junqi_game.dart';
+import '../impl/reversi_game.dart';
 import '../impl/snakes_game.dart';
 import '../impl/xiangqi_game.dart';
 import '../impl/gomoku_game.dart';
@@ -12,6 +15,12 @@ class GameRegistry {
     switch (kind) {
       case GameKind.gomoku:
         return GomokuGame();
+      case GameKind.reversi:
+        return ReversiGame();
+      case GameKind.connect4:
+        return ConnectFourGame();
+      case GameKind.connect6:
+        return ConnectSixGame();
       case GameKind.go:
         return GoGame(size: boardSize == 13 ? 13 : 9);
       case GameKind.xiangqi:

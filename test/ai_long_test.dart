@@ -1,5 +1,8 @@
 import 'package:chess_app/games/core/game_core.dart';
+import 'package:chess_app/games/impl/connect_four_game.dart';
+import 'package:chess_app/games/impl/connect_six_game.dart';
 import 'package:chess_app/games/impl/draughts_game.dart';
+import 'package:chess_app/games/impl/reversi_game.dart';
 import 'package:chess_app/games/impl/go_game.dart';
 import 'package:chess_app/games/impl/gomoku_game.dart';
 import 'package:chess_app/games/impl/jungle_game.dart';
@@ -17,6 +20,9 @@ void main() {
     'jungle': () => JungleGame(),
     'junqi': () => JunqiGame(),
     'snakes': () => SnakesGame(),
+    'reversi': () => ReversiGame(),
+    'connect4': () => ConnectFourGame(),
+    'connect6': () => ConnectSixGame(),
   };
 
   for (final entry in games.entries) {

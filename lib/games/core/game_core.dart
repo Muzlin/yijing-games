@@ -2,7 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../ui/theme.dart';
 
-enum GameKind { chess, xiangqi, junqi, jungle, draughts, snakes, go, gomoku }
+enum GameKind {
+  chess,
+  xiangqi,
+  junqi,
+  jungle,
+  draughts,
+  snakes,
+  go,
+  gomoku,
+  reversi,
+  connect4,
+  connect6,
+}
 
 enum PlayMode { ai, local, aiVsAi, online }
 
@@ -203,6 +215,34 @@ class GameCatalog {
     sideLabels: ['黑方', '白方'],
   );
 
+  static const reversi = GameMeta(
+    kind: GameKind.reversi,
+    title: '黑白棋',
+    subtitle: '翻转 · 奥赛罗',
+    en: 'REVERSI',
+    accent: Color(0xFF8FB36A),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const connect4 = GameMeta(
+    kind: GameKind.connect4,
+    title: '四子棋',
+    subtitle: '重力落子 · 连四',
+    en: 'CONNECT FOUR',
+    accent: Color(0xFFD95B4E),
+    sideLabels: ['红方', '黄方'],
+    aspectRatio: 7 / 6,
+  );
+
+  static const connect6 = GameMeta(
+    kind: GameKind.connect6,
+    title: '六子棋',
+    subtitle: '双落子 · 连六',
+    en: 'CONNECT6',
+    accent: Color(0xFF6C9BD8),
+    sideLabels: ['黑方', '白方'],
+  );
+
   static const all = [
     chess,
     xiangqi,
@@ -212,6 +252,9 @@ class GameCatalog {
     snakes,
     go,
     gomoku,
+    reversi,
+    connect4,
+    connect6,
   ];
 
   static GameMeta of(GameKind kind) =>

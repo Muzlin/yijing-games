@@ -1,4 +1,7 @@
+import 'package:chess_app/games/impl/connect_four_game.dart';
+import 'package:chess_app/games/impl/connect_six_game.dart';
 import 'package:chess_app/games/impl/draughts_game.dart';
+import 'package:chess_app/games/impl/reversi_game.dart';
 import 'package:chess_app/games/impl/go_game.dart';
 import 'package:chess_app/games/impl/gomoku_game.dart';
 import 'package:chess_app/games/impl/jungle_game.dart';
@@ -206,6 +209,73 @@ void main() {
     });
   });
 
+  group('Reversi', () {
+    test('initial legal moves and flipping', () {
+      final game = ReversiGame();
+      expect(game.llmMoves.length, 4);
+      game.apply(3 * 8 + 5);
+      expect(game.board[3 * 8 + 4], 1);
+      expect(game.side, 1);
+      expect(game.isLegal(-1), isFalse);
+    });
+
+    test('AI returns a legal move', () {
+      final game = ReversiGame();
+      final move = game.aiMove(1);
+      expect(game.isLegal(move), isTrue);
+    });
+  });
+
+  group('Connect Four', () {
+    test('gravity drop and four in a row', () {
+      final game = ConnectFourGame();
+      game.board.fillRange(0, 42, 0);
+      game.board[5 * 7 + 0] = 1;
+      game.board[5 * 7 + 1] = 1;
+      game.board[5 * 7 + 2] = 1;
+      game.apply(3);
+      expect(game.board[5 * 7 + 3], 1);
+      expect(game.winner, 0);
+      expect(game.isOver, isTrue);
+    });
+
+    test('AI returns a legal column', () {
+      final game = ConnectFourGame();
+      final column = game.aiMove(1);
+      expect(game.isLegal(column), isTrue);
+    });
+  });
+
+  group('Connect Six', () {
+    test('black opens with one stone, then white gets two', () {
+      final game = ConnectSixGame();
+      game.apply(9 * 19 + 9);
+      expect(game.side, 1);
+      expect(game.llmMoves.length, 360);
+      game.apply(9 * 19 + 10);
+      expect(game.side, 1);
+      game.apply(9 * 19 + 11);
+      expect(game.side, 0);
+    });
+
+    test('six in a row wins', () {
+      final game = ConnectSixGame();
+      game.board.fillRange(0, 361, 0);
+      for (var i = 0; i < 5; i++) {
+        game.board[i] = 1;
+      }
+      game.apply(5);
+      expect(game.winner, 0);
+    });
+
+    test('AI returns a legal move', () {
+      final game = ConnectSixGame();
+      game.apply(9 * 19 + 9);
+      final move = game.aiMove(1);
+      expect(game.isLegal(move), isTrue);
+    });
+  });
+
   group('AI sanity', () {
     test('every game returns a legal AI move', () {
       final gomoku = GomokuGame()..apply(112);
@@ -235,6 +305,16 @@ void main() {
       final snakes = SnakesGame();
       final die = snakes.aiMove(1);
       expect(snakes.isLegal(die), isTrue);
+
+      final reversi = ReversiGame();
+      expect(reversi.isLegal(reversi.aiMove(1)), isTrue);
+
+      final connect4 = ConnectFourGame();
+      expect(connect4.isLegal(connect4.aiMove(1)), isTrue);
+
+      final connect6 = ConnectSixGame();
+      connect6.apply(9 * 19 + 9);
+      expect(connect6.isLegal(connect6.aiMove(1)), isTrue);
     });
   });
 

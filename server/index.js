@@ -23,6 +23,9 @@ const ALLOWED_GAMES = new Set([
   'snakes',
   'go',
   'gomoku',
+  'reversi',
+  'connect4',
+  'connect6',
 ]);
 
 const BOT_NAMES = [
