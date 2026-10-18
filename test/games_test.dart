@@ -84,6 +84,22 @@ void main() {
     });
   });
 
+  group('Draughts captures', () {
+    test('a forced multi-capture that promotes cannot stop early', () {
+      final game = DraughtsGame();
+      game.board.fillRange(0, 64, 0);
+      game.board[35] = 1; // white man at (4,3)
+      game.board[26] = 2; // black man at (3,2)
+      game.board[10] = 2; // black man at (1,2)
+      expect(game.isLegal([35, 17, 3]), isTrue);
+      expect(game.isLegal([35, 17]), isFalse);
+      game.apply([35, 17, 3]);
+      expect(game.board[26], 0);
+      expect(game.board[10], 0);
+      expect(game.board[3], 3); // promoted king
+    });
+  });
+
   group('Xiangqi', () {
     test('initial horse moves', () {
       final game = XiangqiGame();

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../account/account_manager.dart';
+import '../../ai/ai_bridge.dart';
 import '../../online/online_session.dart';
 import '../../ui/sound.dart';
 import '../../ui/theme.dart';
@@ -159,6 +160,60 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
       move = null;
     }
     if (_disposed || generation != _aiGeneration) return;
+    // Let the 32B local model choose among the engine's best move and a few
+    // legal alternatives. The server adds the rules for the specific game.
+    if (config.useLlm &&
+        game.llmSupported &&
+        !assisted &&
+        move != null &&
+        !_isOver) {
+      final level = assisted ? 3 : config.level;
+      final candidates = <Object?>[];
+      final seen = <String>{};
+      void addCandidate(Object? candidate) {
+        if (candidate == null) return;
+        final label = game.describeMove(candidate);
+        if (seen.add(label)) candidates.add(candidate);
+      }
+
+      addCandidate(move);
+      final engineLabel = game.describeMove(move);
+      final pool = game.llmMoves
+          .where((m) => game.describeMove(m) != engineLabel)
+          .toList()
+        ..shuffle(Random());
+      for (final candidate in pool) {
+        addCandidate(candidate);
+        if (candidates.length >= 8) break;
+      }
+      if (candidates.length > 1) {
+        final options = <AiMoveOption>[
+          for (var i = 0; i < candidates.length; i++)
+            AiMoveOption(
+              id: 'm$i',
+              label: game.describeMove(candidates[i]),
+            ),
+        ];
+        final chosenId = await AiBridge.chooseMove(
+          game: config.meta.kind.name,
+          state: game.llmState,
+          moves: options,
+          player: game.side,
+          level: level,
+        );
+        if (_disposed || generation != _aiGeneration || _isOver) return;
+        if (chosenId != null && chosenId.startsWith('m')) {
+          final index = int.tryParse(chosenId.substring(1));
+          if (index != null &&
+              index >= 0 &&
+              index < candidates.length &&
+              game.isLegal(candidates[index])) {
+            move = candidates[index];
+          }
+        }
+      }
+    }
+
     thinking = false;
     if (move != null && !_isOver && game.isLegal(move)) {
       game.apply(move);

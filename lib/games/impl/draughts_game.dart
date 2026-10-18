@@ -136,10 +136,12 @@ class DraughtsGame extends TurnGame {
     for (var i = 0; i < path.length - 1; i++) {
       final from = path[i];
       final to = path[i + 1];
-      if ((to - from).abs() == 2 || (to - from).abs() == 16) {
-        final dx = ((to % 8) - (from % 8)).sign;
-        final dy = ((to ~/ 8) - (from ~/ 8)).sign;
-        final middle = (from ~/ 8 + dy) * 8 + (from % 8 + dx);
+      final fromRow = from ~/ 8;
+      final fromCol = from % 8;
+      final toRow = to ~/ 8;
+      final toCol = to % 8;
+      if ((toRow - fromRow).abs() == 2 && (toCol - fromCol).abs() == 2) {
+        final middle = ((fromRow + toRow) ~/ 2) * 8 + (fromCol + toCol) ~/ 2;
         if (board[middle] != 0) {
           board[middle] = 0;
           captured++;
@@ -285,6 +287,49 @@ class DraughtsGame extends TurnGame {
   }
 
   @override
+  List<Object?> get llmMoves =>
+      _allLegalMoves(_side).map<Object?>((move) => move).toList();
+
+  @override
+  String get llmState {
+    final sb = StringBuffer(
+      '8x8 国际跳棋，w=白兵，W=白王，b=黑兵，B=黑王，.=空。'
+      '坐标 a1..h8，a1 在左下角；y=0 是最上面一行。\n',
+    );
+    for (var y = 0; y < 8; y++) {
+      sb.write('y=$y: ');
+      for (var x = 0; x < 8; x++) {
+        final piece = board[y * 8 + x];
+        sb.write(piece == 0
+            ? '.'
+            : piece == 1
+                ? 'w'
+                : piece == 2
+                    ? 'b'
+                    : piece == 3
+                        ? 'W'
+                        : 'B');
+        sb.write(' ');
+      }
+      sb.writeln();
+    }
+    sb.write('轮到${sideName(_side)}；必须连吃：');
+    sb.write(_captureMovesFor(_side).isNotEmpty ? '是' : '否');
+    sb.write('。');
+    return sb.toString();
+  }
+
+  @override
+  String describeMove(Object? move) {
+    if (move is! List) return '$move';
+    final path = move.cast<num>().map((e) => e.toInt()).toList();
+    return path.map(_squareName).join('->');
+  }
+
+  String _squareName(int index) =>
+      '${String.fromCharCode(97 + index % 8)}${8 - index ~/ 8}';
+
+  @override
   Widget sideBadge(int side, double size) => _CheckersBadge(side: side, size: size);
 
   @override
@@ -355,7 +400,7 @@ class DraughtsGame extends TurnGame {
     final color = _colorOf(piece);
     final x = index % 8;
     final y = index ~/ 8;
-    var extended = false;
+    var foundCapture = false;
     for (final d in const [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
       final mx = x + d[0];
       final my = y + d[1];
@@ -368,14 +413,16 @@ class DraughtsGame extends TurnGame {
       if (target == 0 || _colorOf(target) == color) continue;
       if (source[landing] != 0) continue;
       if (captured.contains(middle)) continue;
+      foundCapture = true;
       final promoted = !_isKing(piece) &&
           ((color == 0 && ly == 0) || (color == 1 && ly == 7));
       final nextPath = List<int>.of(path)..add(landing);
       final nextCaptured = Set<int>.of(captured)..add(middle);
       if (promoted) {
+        // Promotion ends the turn; the path without this capture is not legal
+        // because a capture is still available.
         result.add(nextPath);
       } else {
-        extended = true;
         final simulated = List<int>.of(source);
         simulated[index] = 0;
         simulated[middle] = 0;
@@ -383,7 +430,9 @@ class DraughtsGame extends TurnGame {
         _findCaptures(simulated, landing, piece, nextPath, nextCaptured, result);
       }
     }
-    if (!extended && path.length > 1) {
+    // Only stop here if there was genuinely no further capture from this
+    // square. Previously a promoting capture left the shorter path legal.
+    if (!foundCapture && path.length > 1) {
       result.add(path);
     }
   }
@@ -427,10 +476,12 @@ class _DraughtsPosition {
     for (var i = 0; i < path.length - 1; i++) {
       final from = path[i];
       final to = path[i + 1];
-      if ((to - from).abs() == 2 || (to - from).abs() == 16) {
-        final dx = ((to % 8) - (from % 8)).sign;
-        final dy = ((to ~/ 8) - (from ~/ 8)).sign;
-        final mid = (from ~/ 8 + dy) * 8 + (from % 8 + dx);
+      final fromRow = from ~/ 8;
+      final fromCol = from % 8;
+      final toRow = to ~/ 8;
+      final toCol = to % 8;
+      if ((toRow - fromRow).abs() == 2 && (toCol - fromCol).abs() == 2) {
+        final mid = ((fromRow + toRow) ~/ 2) * 8 + (fromCol + toCol) ~/ 2;
         if (next[mid] != 0) {
           next[mid] = 0;
           captured++;

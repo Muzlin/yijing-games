@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'account/account_manager.dart';
+import 'account/biometric_gate.dart';
 
 import 'games/ui/games_hub_screen.dart';
 import 'ui/theme.dart';
@@ -38,7 +39,7 @@ class ChessApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const GamesHubScreen(),
+      home: const BiometricGate(child: GamesHubScreen()),
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
         return MediaQuery.withClampedTextScaling(

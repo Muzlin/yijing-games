@@ -12,6 +12,8 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>使用 Touch ID 快速登录弈境棋牌</string>
 	<key>CFBundleName</key>
 	<string>弈境棋牌</string>
 	<key>CFBundleDisplayName</key>

@@ -426,6 +426,41 @@ class GoGame extends TurnGame {
   }
 
   @override
+  List<Object?> get llmMoves {
+    final moves = <Object?>[-1];
+    for (var i = 0; i < board.length; i++) {
+      if (board[i] == 0 && _wouldBeLegal(i)) moves.add(i);
+    }
+    return moves;
+  }
+
+  @override
+  String get llmState {
+    final sb = StringBuffer(
+      '${size}x$size 围棋，X=黑方，O=白方，.=空。坐标 (x,y)，y=0 是最上面一行。\n',
+    );
+    for (var y = 0; y < size; y++) {
+      sb.write('y=$y: ');
+      for (var x = 0; x < size; x++) {
+        final value = board[y * size + x];
+        sb.write(value == 0 ? '.' : (value == 1 ? 'X' : 'O'));
+        sb.write(' ');
+      }
+      sb.writeln();
+    }
+    sb.write('轮到 ${sideName(_side)}；黑提子 $_blackCaptures，白提子 $_whiteCaptures；');
+    sb.write('连续停一手 $_passes 次。');
+    return sb.toString();
+  }
+
+  @override
+  String describeMove(Object? move) {
+    if (move == -1) return '停一手 pass';
+    if (move is! int) return '$move';
+    return '(${move % size},${move ~/ size})';
+  }
+
+  @override
   Widget sideBadge(int side, double size) => GameStone(
         white: side == 1,
         size: size,

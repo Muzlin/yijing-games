@@ -328,6 +328,36 @@ class GomokuGame extends TurnGame {
   }
 
   @override
+  List<Object?> get llmMoves => [
+        for (var i = 0; i < cells; i++)
+          if (board[i] == 0) i,
+      ];
+
+  @override
+  String get llmState {
+    final sb = StringBuffer(
+      '15x15 五子棋，X=黑方，O=白方，.=空。坐标 (x,y)，y=0 是最上面一行。\n',
+    );
+    for (var y = 0; y < boardSize; y++) {
+      sb.write('y=$y: ');
+      for (var x = 0; x < boardSize; x++) {
+        final value = board[y * boardSize + x];
+        sb.write(value == 0 ? '.' : (value == 1 ? 'X' : 'O'));
+        sb.write(' ');
+      }
+      sb.writeln();
+    }
+    sb.write('轮到 ${sideName(_side)}。');
+    return sb.toString();
+  }
+
+  @override
+  String describeMove(Object? move) {
+    if (move is! int) return '$move';
+    return '(${move % boardSize},${move ~/ boardSize})';
+  }
+
+  @override
   Widget sideBadge(int side, double size) => GameStone(
         white: side == 1,
         size: size,

@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境国际象棋',
-      applicationVersion: '1.2.3',
+      applicationVersion: '1.2.4',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -365,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '弈境 · 国际象棋  v1.2.3',
+                          '弈境 · 国际象棋  v1.2.4',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 10.5,

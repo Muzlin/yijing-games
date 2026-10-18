@@ -515,6 +515,53 @@ class JungleGame extends TurnGame {
   }
 
   @override
+  List<Object?> get llmMoves {
+    final moves = <Object?>[];
+    for (var from = 0; from < cells; from++) {
+      final piece = board[from];
+      if (piece == 0 || _colorOf(piece) != _side) continue;
+      for (final to in legalTargets(from)) {
+        moves.add(<int>[from, to]);
+      }
+    }
+    return moves;
+  }
+
+  @override
+  String get llmState {
+    final sb = StringBuffer(
+      '7x9 斗兽棋，r=红方，b=蓝方，后面是动物名；.=空。'
+      '坐标 (x,y)，x=0 最左列，y=0 最上面一行。\n',
+    );
+    for (var y = 0; y < rows; y++) {
+      sb.write('y=$y: ');
+      for (var x = 0; x < cols; x++) {
+        final piece = board[y * cols + x];
+        sb.write(piece == 0
+            ? '.'
+            : '${_colorOf(piece) == 0 ? 'r' : 'b'}${_names[_rankOf(piece)]}');
+        sb.write(' ');
+      }
+      sb.writeln();
+    }
+    sb.write('轮到${sideName(_side)}。');
+    return sb.toString();
+  }
+
+  @override
+  String describeMove(Object? move) {
+    if (move is! List || move.length != 2) return '$move';
+    final from = (move[0] as num).toInt();
+    final to = (move[1] as num).toInt();
+    final piece = board[from];
+    final name = piece == 0
+        ? '?'
+        : '${_colorOf(piece) == 0 ? '红' : '蓝'}${_names[_rankOf(piece)]}';
+    return '$name(${from % cols},${from ~/ cols})->'
+        '(${to % cols},${to ~/ cols})';
+  }
+
+  @override
   Widget sideBadge(int side, double size) => Container(
         width: size,
         height: size,

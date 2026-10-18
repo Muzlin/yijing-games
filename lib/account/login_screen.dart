@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../ui/theme.dart';
 import 'account_manager.dart';
+import 'biometric_service.dart';
 import 'account_models.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -21,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _nick = TextEditingController();
   bool _obscure = true;
   bool _submitting = false;
+  bool _bioBusy = false;
   String? _error;
 
   @override
@@ -29,6 +31,24 @@ class _LoginScreenState extends State<LoginScreen> {
     _password.dispose();
     _nick.dispose();
     super.dispose();
+  }
+
+  Future<void> _biometricLogin() async {
+    if (_bioBusy) return;
+    setState(() {
+      _bioBusy = true;
+      _error = null;
+    });
+    final ok = await AccountManager.instance.biometricLogin();
+    if (!mounted) return;
+    setState(() => _bioBusy = false);
+    if (ok) {
+      Navigator.pop(context, AccountManager.instance.user);
+    } else {
+      setState(() {
+        _error = AccountManager.instance.error ?? '指纹验证未通过';
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -51,6 +71,28 @@ class _LoginScreenState extends State<LoginScreen> {
       _submitting = true;
       _error = null;
     });
+    if (_register) {
+      final available = await BiometricService.isAvailable(refresh: true);
+      if (!available) {
+        if (!mounted) return;
+        setState(() {
+          _submitting = false;
+          _error = '注册需要绑定指纹，当前设备不支持或未录入指纹';
+        });
+        return;
+      }
+      final verified = await BiometricService.authenticate(
+        reason: '验证指纹以完成注册并绑定一键登录',
+      );
+      if (!verified) {
+        if (!mounted) return;
+        setState(() {
+          _submitting = false;
+          _error = '需要验证指纹才能完成注册';
+        });
+        return;
+      }
+    }
     try {
       final user = _register
           ? await AccountManager.instance.register(
@@ -62,6 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
               phone: phone,
               password: password,
             );
+      if (_register) {
+        await AccountManager.instance.bindBiometricAfterAuthentication();
+      }
       if (!mounted) return;
       Navigator.pop(context, user);
     } on AccountException catch (error) {
@@ -152,6 +197,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppColors.muted,
                       ),
                     ),
+                    if (!_register &&
+                        AccountManager.instance.hasBiometricLogin &&
+                        AccountManager.instance.biometricAvailable) ...[
+                      const SizedBox(height: 22),
+                      _BiometricCard(
+                        nick: AccountManager.instance.biometricUser?.nick ?? '',
+                        busy: _bioBusy,
+                        onTap: _biometricLogin,
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _ModeToggle(
                       register: _register,
@@ -197,6 +252,34 @@ class _LoginScreenState extends State<LoginScreen> {
                         formatters: [
                           LengthLimitingTextInputFormatter(12),
                         ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: AppColors.gold.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.gold.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.fingerprint_rounded,
+                                size: 17, color: AppColors.gold),
+                            SizedBox(width: 7),
+                            Expanded(
+                              child: Text(
+                                '注册需要验证并绑定指纹，用于下次一键登录',
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: AppColors.muted,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                     if (_error != null) ...[
@@ -249,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Color(0xFF231A08),
                                 ),
                               )
-                            : Text(_register ? '注册并登录' : '登录'),
+                            : Text(_register ? '注册并绑定指纹' : '登录'),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -278,6 +361,87 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BiometricCard extends StatelessWidget {
+  final String nick;
+  final bool busy;
+  final VoidCallback onTap;
+
+  const _BiometricCard({
+    required this.nick,
+    required this.busy,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: busy ? null : onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.gold.withValues(alpha: 0.16),
+              AppColors.surface.withValues(alpha: 0.7),
+            ],
+          ),
+          border: Border.all(color: AppColors.gold.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.gold.withValues(alpha: 0.14),
+              ),
+              child: busy
+                  ? const Padding(
+                      padding: EdgeInsets.all(11),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.gold,
+                      ),
+                    )
+                  : const Icon(Icons.fingerprint_rounded,
+                      size: 25, color: AppColors.gold),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '指纹一键登录',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    busy ? '正在验证指纹…' : '继续以 $nick 登录',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      color: AppColors.muted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                size: 20, color: AppColors.muted),
+          ],
         ),
       ),
     );

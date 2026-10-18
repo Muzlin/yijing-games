@@ -29,6 +29,7 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
   int _level = 2; // default to 高手 so the dedicated engines have some depth
   int _side = 0;
   int _boardSize = 0;
+  bool _useLlm = true;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
         boardSize: _mode == PlayMode.online
             ? (widget.meta.supportsBoardSize ? widget.meta.defaultBoardSize : 0)
             : _boardSize,
+        useLlm: _useLlm && widget.meta.kind != GameKind.snakes,
       ),
     );
   }
@@ -220,6 +222,69 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
                             const SizedBox(width: 8),
                         ],
                       ],
+                    ),
+                  ],
+                  if (widget.meta.kind != GameKind.snakes) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceHigh.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _useLlm
+                              ? AppColors.gold.withValues(alpha: 0.4)
+                              : AppColors.line,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.psychology_alt_rounded,
+                            size: 20,
+                            color: _useLlm ? AppColors.gold : AppColors.muted,
+                          ),
+                          const SizedBox(width: 9),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '32B 本地模型 AI',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'qwen2.5:32b 读取规则和局面，从引擎最佳 + 候选着法中选择',
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    height: 1.4,
+                                    color: AppColors.muted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _useLlm,
+                            onChanged: (value) =>
+                                setState(() => _useLlm = value),
+                            activeTrackColor:
+                                AppColors.gold.withValues(alpha: 0.55),
+                            activeThumbColor: AppColors.gold,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      '蛇棋没有策略，只掷骰子，因此不使用 32B 模型。',
+                      style: TextStyle(fontSize: 10, color: AppColors.muted),
                     ),
                   ],
                   if (_mode == PlayMode.online) ...[

@@ -28,6 +28,42 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _rebindBiometric(BuildContext context) async {
+    final manager = AccountManager.instance;
+    if (!manager.isLoggedIn) return;
+    final ok = await manager.enableBiometric();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok
+            ? '指纹已重新绑定'
+            : (manager.error ?? '重新绑定失败')),
+      ),
+    );
+  }
+
+  Future<void> _toggleBiometric(BuildContext context) async {
+    final manager = AccountManager.instance;
+    if (!manager.isLoggedIn) return;
+    if (manager.biometricEnabled) {
+      await manager.disableBiometric();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已关闭指纹一键登录')),
+      );
+    } else {
+      final ok = await manager.enableBiometric();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ok
+              ? '已开启指纹一键登录，下次启动可用指纹进入'
+              : (manager.error ?? '开启失败')),
+        ),
+      );
+    }
+  }
+
   Future<void> _logout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -35,9 +71,11 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: AppColors.surfaceHigh,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('退出账号？'),
-        content: const Text(
-          '退出后需要重新登录才能联机对战，本地人机对局不受影响。',
-          style: TextStyle(color: AppColors.muted, height: 1.5),
+        content: Text(
+          AccountManager.instance.biometricEnabled
+              ? '退出后仍可用指纹一键登录。如需彻底关闭指纹，请先在个人中心关闭「指纹一键登录」。'
+              : '退出后需要重新登录才能联机对战，本地人机对局不受影响。',
+          style: const TextStyle(color: AppColors.muted, height: 1.5),
         ),
         actions: [
           TextButton(
@@ -186,6 +224,13 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
+                          ),
+                          const SizedBox(height: 12),
+                          _BiometricTile(
+                            enabled: manager.biometricEnabled,
+                            available: manager.biometricAvailable,
+                            onChanged: () => _toggleBiometric(context),
+                            onRebind: () => _rebindBiometric(context),
                           ),
                           const SizedBox(height: 20),
                           SizedBox(
@@ -340,6 +385,96 @@ class _RatingChip extends StatelessWidget {
           const Text(
             'ELO',
             style: TextStyle(fontSize: 9, color: AppColors.muted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BiometricTile extends StatelessWidget {
+  final bool enabled;
+  final bool available;
+  final VoidCallback onChanged;
+  final VoidCallback onRebind;
+
+  const _BiometricTile({
+    required this.enabled,
+    required this.available,
+    required this.onChanged,
+    required this.onRebind,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = !available
+        ? '此设备不支持指纹或未录入指纹'
+        : enabled
+            ? '已开启 · 下次打开 App 可用指纹进入'
+            : '开启后可用 Touch ID / 指纹一键登录';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: enabled
+              ? AppColors.gold.withValues(alpha: 0.4)
+              : AppColors.line,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppColors.gold.withValues(alpha: 0.13),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.fingerprint_rounded,
+              size: 20,
+              color: available
+                  ? AppColors.gold
+                  : AppColors.muted.withValues(alpha: 0.5),
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '指纹一键登录',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    color: AppColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (enabled && available)
+            IconButton(
+              onPressed: onRebind,
+              tooltip: '重新绑定指纹',
+              icon: const Icon(Icons.refresh_rounded,
+                  size: 18, color: AppColors.muted),
+            ),
+          Switch(
+            value: enabled,
+            onChanged: available ? (_) => onChanged() : null,
+            activeTrackColor: AppColors.gold.withValues(alpha: 0.55),
+            activeThumbColor: AppColors.gold,
           ),
         ],
       ),

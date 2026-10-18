@@ -39,6 +39,7 @@ class GameMatchConfig {
   final int humanSide;
   final int boardSize;
   final String? opponentName;
+  final bool useLlm;
 
   const GameMatchConfig({
     required this.meta,
@@ -47,6 +48,7 @@ class GameMatchConfig {
     this.humanSide = 0,
     this.boardSize = 0,
     this.opponentName,
+    this.useLlm = false,
   });
 
   bool get isOnline => mode == PlayMode.online;
@@ -89,6 +91,20 @@ abstract class TurnGame {
   String? get primaryActionLabel => null;
   IconData get primaryActionIcon => Icons.touch_app_rounded;
   void primaryAction() {}
+
+  /// Whether the 32B local model can meaningfully choose a move (Snakes only
+  /// rolls dice, so it is excluded).
+  bool get llmSupported => true;
+
+  /// All legal moves, used as candidates for the 32B model.
+  List<Object?> get llmMoves => const [];
+
+  /// A human-readable board state for the 32B prompt (rules are supplied by
+  /// the bridge on the server).
+  String get llmState => '';
+
+  /// Human-readable move description used as the option label.
+  String describeMove(Object? move) => '$move';
 
   /// Extra game-specific controls.
   List<TurnGameAction> get actions => const [];

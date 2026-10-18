@@ -172,6 +172,14 @@ class SnakesGame extends TurnGame {
   }
 
   @override
+  bool get llmSupported => false;
+
+  @override
+  String get llmState =>
+      '蛇棋：红方第 ${positions[0]} 格，蓝方第 ${positions[1]} 格，'
+      '轮到${sideName(_side)}。蛇棋没有策略，只能掷骰子。';
+
+  @override
   Widget sideBadge(int side, double size) => Container(
         width: size,
         height: size,

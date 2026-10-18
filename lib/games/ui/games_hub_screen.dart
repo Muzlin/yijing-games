@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../account/account_manager.dart';
 import '../../account/login_screen.dart';
+import '../../ai/ai_bridge.dart';
 import '../../account/profile_screen.dart';
 import '../../core/chess.dart';
 import '../../game/models.dart';
@@ -28,6 +31,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
     super.initState();
     AccountManager.instance.addListener(_onAccountChanged);
     _loadSound();
+    unawaited(AiBridge.check());
   }
 
   Future<void> _loadSound() async {
@@ -60,7 +64,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境 · 棋牌合集',
-      applicationVersion: '1.2.3',
+      applicationVersion: '1.2.4',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -131,6 +135,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                   level: level,
                   humanSide: session.mySide ?? 0,
                   boardSize: config.boardSize,
+                  useLlm: config.useLlm,
                 ),
                 onlineSession: session,
                 opponentAlias: session.opponent?.name,
@@ -244,7 +249,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v1.2.3',
+                      '弈境 · 棋牌合集  v1.2.4',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,

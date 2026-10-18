@@ -625,6 +625,48 @@ class XiangqiGame extends TurnGame {
   }
 
   @override
+  List<Object?> get llmMoves =>
+      _allLegalMoves(_side).map<Object?>((move) => move).toList();
+
+  @override
+  String get llmState {
+    final sb = StringBuffer(
+      '9x10 中国象棋，红方用大写 K/A/B/N/R/C/P，黑方用小写，.=空。'
+      '坐标 (x,y)，x=0 是最左列，y=0 是最上面一行。\n',
+    );
+    for (var y = 0; y < rows; y++) {
+      sb.write('y=$y: ');
+      for (var x = 0; x < cols; x++) {
+        final piece = board[y * cols + x];
+        sb.write(piece == 0 ? '.' : _llmSymbol(piece));
+        sb.write(' ');
+      }
+      sb.writeln();
+    }
+    sb.write('轮到${sideName(_side)}；被将军：${isInCheck(_side) ? '是' : '否'}。');
+    return sb.toString();
+  }
+
+  String _llmSymbol(int piece) {
+    const letters = ['', 'K', 'A', 'B', 'N', 'R', 'C', 'P'];
+    final letter = letters[_typeOf(piece)];
+    return _colorOf(piece) == 0 ? letter : letter.toLowerCase();
+  }
+
+  @override
+  String describeMove(Object? move) {
+    if (move is! int) return '$move';
+    final from = move ~/ cells;
+    final to = move % cells;
+    final piece = board[from];
+    final name = _colorOf(piece) == 0
+        ? _redNames[_typeOf(piece)]
+        : _blackNames[_typeOf(piece)];
+    return '$name(${from % cols},${from ~/ cols})->'
+        '(${to % cols},${to ~/ cols})';
+  }
+
+  @override
   Widget sideBadge(int side, double size) => GameDisc(
         label: side == 0 ? '帅' : '将',
         color: side == 0 ? const Color(0xFFC94F43) : const Color(0xFF2B3138),
