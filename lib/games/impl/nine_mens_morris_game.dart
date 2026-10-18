@@ -515,6 +515,7 @@ class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _NinePainter(
+                      game: game,
                       cell: cell,
                       pad: pad,
                       flipped: widget.flipped,
@@ -570,6 +571,7 @@ class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
 }
 
 class _NinePainter extends CustomPainter {
+  final NineMensMorrisGame game;
   final double cell;
   final double pad;
   final bool flipped;
@@ -579,6 +581,7 @@ class _NinePainter extends CustomPainter {
   final bool removal;
 
   _NinePainter({
+    required this.game,
     required this.cell,
     required this.pad,
     required this.flipped,
@@ -610,6 +613,20 @@ class _NinePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     for (final link in NineMensMorrisGame.links) {
       canvas.drawLine(at(link[0]), at(link[1]), line);
+    }
+    for (final mill in NineMensMorrisGame.mills) {
+      final value = game.board[mill[0]];
+      if (value == 0 ||
+          game.board[mill[1]] != value ||
+          game.board[mill[2]] != value) {
+        continue;
+      }
+      final glow = Paint()
+        ..color = const Color(0xFFE7BC6C).withValues(alpha: 0.55)
+        ..strokeWidth = cell * 0.13
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      canvas.drawLine(at(mill[0]), at(mill[2]), glow);
     }
     final pointPaint = Paint()..color = const Color(0xFF4A301B);
     for (var i = 0; i < 24; i++) {

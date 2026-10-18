@@ -577,7 +577,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                               size: 38, color: AppColors.gold)
                           : game.sideBadge(_winner!, 58),
                       stats:
-                          '共 ${game.moveCount} 步 · $_modeLabel',
+                          '${config.meta.title} · 共 ${game.moveCount} 步 · $_modeLabel',
                       onlineLike: _isOnlineLike,
                       onRematch: () {
                         if (_isOnlineLike) {
@@ -604,11 +604,15 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     const playerHeight = 56.0;
     const controlsHeight = 62.0;
     const gap = 10.0;
+    const moveStripHeight = 24.0;
+    const stripGap = 6.0;
     final availableH = constraints.maxHeight -
         headerHeight -
         controlsHeight -
         playerHeight * 2 -
         gap * 3 -
+        moveStripHeight -
+        stripGap -
         20;
     final availableW = constraints.maxWidth - 28;
     final aspect = config.meta.aspectRatio;
@@ -656,6 +660,11 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(height: stripGap),
+                SizedBox(
+                  height: moveStripHeight,
+                  child: _buildMoveStrip(),
                 ),
                 const SizedBox(height: gap),
                 Padding(
@@ -794,6 +803,8 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                               _infoRow('模式', _modeLabel),
                               const SizedBox(height: 8),
                               _infoRow('手数', '${game.moveCount}'),
+                              const SizedBox(height: 8),
+                              _infoRow('行棋', game.sideName(game.side)),
                               if (_lastMoveText != null) ...[
                                 const SizedBox(height: 8),
                                 _infoRow('上一步', _lastMoveText!),
@@ -858,6 +869,54 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
       return config.humanSide;
     }
     return flipped ? 1 : 0;
+  }
+
+  Widget _buildMoveStrip() {
+    final text = _lastMoveText == null
+        ? '${game.moveCount} 手 · 等待落子'
+        : '${game.moveCount} 手 · '
+            '${_lastMoveSide == null ? '' : game.sideName(_lastMoveSide!)} '
+            '${_lastMoveText!}';
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: config.meta.accent.withValues(alpha: 0.075),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: config.meta.accent.withValues(alpha: 0.18),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.history_rounded,
+                size: 12, color: config.meta.accent.withValues(alpha: 0.8)),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 9.5,
+                  color: AppColors.muted,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+            if (thinking)
+              Text(
+                '思考中',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: config.meta.accent,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildHeader() {

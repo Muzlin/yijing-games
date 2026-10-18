@@ -572,7 +572,7 @@ class _ShogiBoardState extends State<ShogiBoard> {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final height = min(constraints.maxHeight, width * 1.10);
-        final handH = height * 0.105;
+        final handH = height * 0.09;
         final boardSize = min(width, height - handH * 2);
         final cell = boardSize / 9;
         final stone = cell * 0.82;
