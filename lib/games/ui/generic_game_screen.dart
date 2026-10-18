@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../platform/system_mouse.dart';
+
 import '../../account/account_manager.dart';
 import '../../ai/ai_bridge.dart';
 import '../../online/online_session.dart';
@@ -39,7 +41,9 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
   int boardVersion = 0;
   bool thinking = false;
   bool assisted = false;
+  bool _systemMouseAssist = false;
   bool paused = false;
+  final GlobalKey _assistKey = GlobalKey();
   bool manualOverride = false;
   bool flipped = false;
   Object? hint;
@@ -247,9 +251,17 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     if (config.mode == PlayMode.aiVsAi) {
       if (!manualOverride && !paused) _maybeAi();
     } else if (config.mode == PlayMode.ai) {
-      if (assisted || game.side != config.humanSide) _maybeAi();
+      if (assisted || game.side != config.humanSide) {
+        _maybeAi();
+      } else if (_systemMouseAssist) {
+        _scheduleSystemClick();
+      }
     } else if (config.mode == PlayMode.online) {
-      if (assisted && game.side == config.humanSide) _maybeAi();
+      if (assisted && game.side == config.humanSide) {
+        _maybeAi();
+      } else if (_systemMouseAssist && game.side == config.humanSide) {
+        _scheduleSystemClick();
+      }
     }
   }
 
@@ -261,6 +273,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
 
   void _onBoardMove(Object? move) {
     if (!_canHumanMove || !game.isLegal(move)) return;
+    _aiGeneration++;
     final mover = game.side;
     game.apply(move);
     _lastMoveText = game.describeMove(move);
@@ -323,10 +336,19 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     }
     boardVersion++;
     setState(() {});
+    if (_systemMouseAssist &&
+        !_isOver &&
+        game.side == config.humanSide) {
+      _scheduleSystemClick();
+    }
   }
 
   void _toggleAssisted() {
     if (config.mode != PlayMode.ai && config.mode != PlayMode.online) return;
+    if (config.systemMouse && SystemMouse.supported) {
+      _toggleSystemMouseAssist();
+      return;
+    }
     assisted = !assisted;
     if (!assisted) {
       _aiGeneration++;
@@ -334,6 +356,85 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     }
     setState(() {});
     if (assisted && game.side == config.humanSide) _maybeAi();
+  }
+
+  Future<void> _toggleSystemMouseAssist() async {
+    if (_isOver) return;
+    if (!_systemMouseAssist) {
+      final ok = await SystemMouse.requestTrust();
+      if (!ok) {
+        if (!mounted) return;
+        _showSystemMouseMessage('未获得辅助功能权限，可在系统设置 → 隐私与安全性 → 辅助功能中开启。');
+        return;
+      }
+    }
+    _aiGeneration++;
+    thinking = false;
+    _systemMouseAssist = !_systemMouseAssist;
+    if (!mounted) return;
+    setState(() {});
+    if (_systemMouseAssist) {
+      _scheduleSystemClick();
+    }
+  }
+
+  void _showSystemMouseMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _scheduleSystemClick() {
+    if (!_systemMouseAssist ||
+        _isOver ||
+        !SystemMouse.supported ||
+        thinking ||
+        (config.mode != PlayMode.ai && config.mode != PlayMode.online) ||
+        game.side != config.humanSide) {
+      return;
+    }
+    final generation = ++_aiGeneration;
+    Future<void>.delayed(const Duration(milliseconds: 520), () async {
+      if (generation != _aiGeneration ||
+          !_systemMouseAssist ||
+          _isOver ||
+          thinking ||
+          game.side != config.humanSide) {
+        return;
+      }
+      final context = _assistKey.currentContext;
+      final box = context?.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) {
+        _systemMouseFallback();
+        return;
+      }
+      final point = box.localToGlobal(box.size.center(Offset.zero));
+      final before = game.moveCount;
+      final ok = await SystemMouse.click(point);
+      if (!ok) {
+        _systemMouseFallback();
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 650));
+      if (generation == _aiGeneration &&
+          _systemMouseAssist &&
+          !_isOver &&
+          game.side == config.humanSide &&
+          game.moveCount == before) {
+        _systemMouseFallback();
+      }
+    });
+  }
+
+  void _systemMouseFallback() {
+    if (!mounted) return;
+    _aiGeneration++;
+    _systemMouseAssist = false;
+    assisted = true;
+    setState(() {});
+    _showSystemMouseMessage('系统辅助点击失败，已切回普通 AI 托管。');
+    _maybeAi();
   }
 
   void _togglePaused() {
@@ -373,6 +474,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     boardVersion++;
     thinking = false;
     assisted = false;
+    _systemMouseAssist = false;
     paused = false;
     manualOverride = false;
     hint = null;
@@ -1049,8 +1151,11 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
             ? game.sideName(side)
             : paused
                 ? '已暂停'
-                : assisted && side == config.humanSide
-                    ? 'AI 托管中 · 自动落子'
+                : (assisted || _systemMouseAssist) &&
+                        side == config.humanSide
+                    ? (_systemMouseAssist
+                        ? '系统鼠标托管中 · 自动点击'
+                        : 'AI 托管中 · 自动落子')
                     : manualOverride && active
                         ? '你来帮它走一步'
                         : active
@@ -1220,11 +1325,14 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
         onTap: _primaryAction,
       ));
     }
-    buttons.add(_Control(
-      icon: Icons.auto_awesome_rounded,
-      label: 'AI 代下',
-      enabled: _canHumanMove,
-      onTap: _assistOnce,
+    buttons.add(KeyedSubtree(
+      key: _assistKey,
+      child: _Control(
+        icon: Icons.auto_awesome_rounded,
+        label: 'AI 代下',
+        enabled: _canHumanMove,
+        onTap: _assistOnce,
+      ),
     ));
     if (config.mode == PlayMode.aiVsAi) {
       buttons.add(_Control(
@@ -1242,8 +1350,8 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     } else if (config.mode == PlayMode.ai || _isOnlineReal) {
       buttons.add(_Control(
         icon: Icons.smart_toy_rounded,
-        label: assisted ? '托管中' : '托管',
-        active: assisted,
+        label: assisted || _systemMouseAssist ? '托管中' : '托管',
+        active: assisted || _systemMouseAssist,
         enabled: !_isOver,
         onTap: _toggleAssisted,
       ));

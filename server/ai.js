@@ -88,6 +88,16 @@ const GAME_RULES = {
   tycoon: '地产大亨是掷骰子棋盘游戏，使用引擎决策，不使用大模型。',
   doudizhu: '斗地主（二人简化版）使用引擎决策，不使用大模型。',
   mahjong: '麻将（二人简化版）使用引擎决策，不使用大模型。',
+  ticTacToe: '3x3 井字棋，X 先手，O 后手；横竖斜三连者胜，九格填满和棋。',
+  fiveFieldKono: '五子飞（Five Field Kono）5x5，双方各 5 子；每回合走到相邻空格，五子全部到达对方底线者胜。',
+  hex: '11x11 六角棋，X=黑方上下连通，O=白方左右连通；轮流落子，先连通者胜。',
+  dotsBoxes: '点格棋，6x6 点、5x5 格；双方画线，完成格子得分并继续；全部格子完成后分数多者胜。',
+  mancala: '曼卡拉（Kalah）2x6 坑；逆时针播种，最后一籽落己方仓库可再走，落己方空坑可俘获对面；仓库籽多者胜。',
+  oware: '播棋（Oware）2x6 坑；逆时针播种，最后一籽落在对方 2/3 籽坑可俘获并连续俘获；俘获 25 籽或对方无子可动者胜。',
+  hareHounds: '7x7 野兔与猎犬；野兔任意方向走一格，猎犬只能向下/斜下；野兔到顶胜，猎犬围困野兔胜。',
+  foxGeese: '7x7 十字狐狸与鹅；狐狸走一格或跳吃鹅，鹅向下/横走；狐狸吃 5 鹅胜，鹅围困狐狸胜。',
+  quoridor: '9x9 墙棋简化版；红从左到右、蓝从右到左，每次走一格或放单格墙，不能完全堵死；先到对方底线胜。',
+  twelveMensMorris: '十二子棋，24 点，双方各 12 子；三连吃子，少于 3 子或无法移动者负；无飞子。',
 };
 
 function json(res, status, payload) {
@@ -177,6 +187,16 @@ function gameName(game) {
     tycoon: '地产大亨',
     doudizhu: '斗地主',
     mahjong: '麻将',
+    ticTacToe: '井字棋',
+    fiveFieldKono: '五子飞',
+    hex: '六角棋',
+    dotsBoxes: '点格棋',
+    mancala: '曼卡拉',
+    oware: '播棋',
+    hareHounds: '兔与猎犬',
+    foxGeese: '狐狸与鹅',
+    quoridor: '墙棋',
+    twelveMensMorris: '十二子棋',
   };
   return names[game] || '棋类游戏';
 }

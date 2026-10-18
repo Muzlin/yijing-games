@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
+import '../../platform/system_mouse.dart';
 import '../../ui/theme.dart';
 import '../core/game_core.dart';
 
@@ -30,6 +33,7 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
   int _side = 0;
   int _boardSize = 0;
   bool _useLlm = true;
+  bool _systemMouse = false;
 
   @override
   void initState() {
@@ -49,6 +53,7 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
             ? (widget.meta.supportsBoardSize ? widget.meta.defaultBoardSize : 0)
             : _boardSize,
         useLlm: _useLlm && widget.meta.kind != GameKind.snakes,
+        systemMouse: _systemMouse,
       ),
     );
   }
@@ -285,6 +290,81 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
                     const Text(
                       '蛇棋没有策略，只掷骰子，因此不使用 32B 模型。',
                       style: TextStyle(fontSize: 10, color: AppColors.muted),
+                    ),
+                  ],
+                  if (Platform.isMacOS &&
+                      (_mode == PlayMode.ai || _mode == PlayMode.online)) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceHigh.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _systemMouse
+                              ? AppColors.gold.withValues(alpha: 0.4)
+                              : AppColors.line,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.mouse_rounded,
+                            size: 20,
+                            color: _systemMouse ? AppColors.gold : AppColors.muted,
+                          ),
+                          const SizedBox(width: 9),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '系统辅助鼠标托管',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  '开启后，AI 托管会用 macOS 辅助功能真实点击“AI 代下”；'
+                                  '首次需要授予辅助功能权限。',
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    height: 1.4,
+                                    color: AppColors.muted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _systemMouse,
+                            onChanged: (value) async {
+                              if (value) {
+                                final ok = await SystemMouse.requestTrust();
+                                if (!ok) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          '未获得辅助功能权限；可稍后在系统设置 → 隐私与安全性 → 辅助功能中开启。',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return;
+                                }
+                              }
+                              if (mounted) setState(() => _systemMouse = value);
+                            },
+                            activeTrackColor:
+                                AppColors.gold.withValues(alpha: 0.55),
+                            activeThumbColor: AppColors.gold,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                   if (_mode == PlayMode.online) ...[

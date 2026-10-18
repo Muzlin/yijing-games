@@ -45,6 +45,16 @@ void main() {
       '地产大亨',
       '斗地主',
       '麻将',
+      '井字棋',
+      '五子飞',
+      '六角棋',
+      '点格棋',
+      '曼卡拉',
+      '播棋',
+      '兔与猎犬',
+      '狐狸与鹅',
+      '墙棋',
+      '十二子棋',
     ]) {
       await tester.ensureVisible(find.text(title));
       await tester.pump(const Duration(milliseconds: 100));

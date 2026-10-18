@@ -3,17 +3,26 @@ import '../impl/backgammon_game.dart';
 import '../impl/go_game.dart';
 import '../impl/chinese_checkers_game.dart';
 import '../impl/connect_four_game.dart';
+import '../impl/dots_boxes_game.dart';
 import '../impl/connect_six_game.dart';
 import '../impl/doudizhu_game.dart';
 import '../impl/draughts_game.dart';
+import '../impl/five_field_kono_game.dart';
+import '../impl/fox_geese_game.dart';
 import '../impl/flying_chess_game.dart';
 import '../impl/jungle_game.dart';
+import '../impl/hare_hounds_game.dart';
+import '../impl/hex_game.dart';
 import '../impl/junqi_game.dart';
 import '../impl/mahjong_game.dart';
+import '../impl/mancala_game.dart';
 import '../impl/nine_mens_morris_game.dart';
+import '../impl/oware_game.dart';
+import '../impl/quoridor_game.dart';
 import '../impl/reversi_game.dart';
 import '../impl/snakes_game.dart';
 import '../impl/shogi_game.dart';
+import '../impl/tic_tac_toe_game.dart';
 import '../impl/tiger_game.dart';
 import '../impl/tycoon_game.dart';
 import '../impl/xiangqi_game.dart';
@@ -51,6 +60,26 @@ class GameRegistry {
         return DouDizhuGame();
       case GameKind.mahjong:
         return MahjongGame();
+      case GameKind.ticTacToe:
+        return TicTacToeGame();
+      case GameKind.fiveFieldKono:
+        return FiveFieldKonoGame();
+      case GameKind.hex:
+        return HexGame();
+      case GameKind.dotsBoxes:
+        return DotsBoxesGame();
+      case GameKind.mancala:
+        return MancalaGame();
+      case GameKind.oware:
+        return OwareGame();
+      case GameKind.hareHounds:
+        return HareHoundsGame();
+      case GameKind.foxGeese:
+        return FoxGeeseGame();
+      case GameKind.quoridor:
+        return QuoridorGame();
+      case GameKind.twelveMensMorris:
+        return TwelveMensMorrisGame();
       case GameKind.go:
         return GoGame(size: boardSize == 13 ? 13 : 9);
       case GameKind.xiangqi:

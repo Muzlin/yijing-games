@@ -42,6 +42,9 @@ class NineMensMorrisGame extends TurnGame {
   final List<int> board = List<int>.filled(points, 0);
   final List<int> placed = [0, 0];
   final List<_NineSnapshot> _history = [];
+
+  int get pieceCount => 9;
+  bool get usesFlying => true;
   int _side = 0;
   int? _winner;
   int? _last;
@@ -77,14 +80,18 @@ class NineMensMorrisGame extends TurnGame {
     return count;
   }
 
-  bool get _flying => placed[0] >= 9 && placed[1] >= 9 && countOnBoard(_side) == 3;
+  bool get _flying =>
+      usesFlying &&
+      placed[0] >= pieceCount &&
+      placed[1] >= pieceCount &&
+      countOnBoard(_side) == 3;
 
   @override
   String get statusText {
     if (_winner != null) return resultTitle;
     if (_pendingRemove) return '${sideName(_side)}取子';
-    if (placed[_side] < 9) {
-      return '${sideName(_side)}布子 · 还剩 ${9 - placed[_side]} 子';
+    if (placed[_side] < pieceCount) {
+      return '${sideName(_side)}布子 · 还剩 ${pieceCount - placed[_side]} 子';
     }
     return _flying ? '${sideName(_side)}飞子' : '${sideName(_side)}走子';
   }
@@ -103,7 +110,7 @@ class NineMensMorrisGame extends TurnGame {
 
   @override
   String scoreText(int side) =>
-      '${countOnBoard(side)} 子 · 待布 ${9 - placed[side]}';
+      '${countOnBoard(side)} 子 · 待布 ${pieceCount - placed[side]}';
 
   bool _isMillAt(int index, int player) {
     for (final mill in mills) {
@@ -144,7 +151,7 @@ class NineMensMorrisGame extends TurnGame {
       ];
 
   bool _hasMove(int side) {
-    if (placed[side] < 9) return true;
+    if (placed[side] < pieceCount) return true;
     final own = countOnBoard(side);
     if (own < 3) return false;
     final flying = own == 3;
@@ -169,7 +176,7 @@ class NineMensMorrisGame extends TurnGame {
       }
       return list;
     }
-    if (placed[side] < 9) {
+    if (placed[side] < pieceCount) {
       for (var i = 0; i < points; i++) {
         if (board[i] == 0) list.add(NineMove(-1, i));
       }
@@ -196,7 +203,7 @@ class NineMensMorrisGame extends TurnGame {
     if (isOver || move is! NineMove) return false;
     if (_pendingRemove) return move.to >= 0 && move.to < points && _canRemove(move.to);
     if (move.to < 0 || move.to >= points || board[move.to] != 0) return false;
-    if (placed[_side] < 9) return true;
+    if (placed[_side] < pieceCount) return true;
     if (move.from < 0 || move.from >= points || board[move.from] != _side + 1) {
       return false;
     }
@@ -214,14 +221,14 @@ class NineMensMorrisGame extends TurnGame {
       _pendingRemove = false;
       _last = m.to;
       _moveCount++;
-      if (placed[1 - _side] >= 9 && countOnBoard(1 - _side) < 3) {
+      if (placed[1 - _side] >= pieceCount && countOnBoard(1 - _side) < 3) {
         _winner = _side;
         return;
       }
       _switchSide();
       return;
     }
-    if (placed[_side] < 9) {
+    if (placed[_side] < pieceCount) {
       board[m.to] = _side + 1;
       placed[_side]++;
     } else {
@@ -239,7 +246,7 @@ class NineMensMorrisGame extends TurnGame {
 
   void _switchSide() {
     _side = 1 - _side;
-    if (countOnBoard(_side) < 3 && placed[_side] >= 9) {
+    if (countOnBoard(_side) < 3 && placed[_side] >= pieceCount) {
       _winner = 1 - _side;
       return;
     }
@@ -352,7 +359,7 @@ class NineMensMorrisGame extends TurnGame {
   String get llmState {
     final sb = StringBuffer(
       '九子棋（Nine Men\'s Morris）7x7 棋盘上的 24 个点。X=黑方，O=白方。\n'
-      '黑方先布子，双方各 9 子；布完后走子。三子连成一线（横或竖）可吃掉对方一子，'
+      '黑方先布子，双方各 $pieceCount 子；布完后走子。三子连成一线（横或竖）可吃掉对方一子，'
       '不能吃已成三连的棋子，除非对方所有棋子都在三连中。\n'
       '棋子少于 3 或无法移动者负；只剩 3 子时可以飞到任意空点。\n',
     );
@@ -371,7 +378,7 @@ class NineMensMorrisGame extends TurnGame {
       sb.writeln();
     }
     sb.write('轮到${sideName(_side)}；盘面 ${countOnBoard(_side)} 子，'
-        '待布 ${9 - placed[_side]} 子。');
+        '待布 ${pieceCount - placed[_side]} 子。');
     return sb.toString();
   }
 
@@ -404,6 +411,17 @@ class NineMensMorrisGame extends TurnGame {
       flipped: flipped,
     );
   }
+}
+
+class TwelveMensMorrisGame extends NineMensMorrisGame {
+  @override
+  int get pieceCount => 12;
+
+  @override
+  bool get usesFlying => false;
+
+  @override
+  GameMeta get meta => GameCatalog.twelveMensMorris;
 }
 
 class _NineSnapshot {
@@ -447,7 +465,7 @@ class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
     if (game._pendingRemove) {
       return [for (var i = 0; i < 24; i++) if (game._canRemove(i)) i];
     }
-    if (game.placed[game.side] < 9) {
+    if (game.placed[game.side] < game.pieceCount) {
       return [for (var i = 0; i < 24; i++) if (game.board[i] == 0) i];
     }
     if (selected != null) {
@@ -541,7 +559,7 @@ class _NineMensMorrisBoardState extends State<NineMensMorrisBoard> {
       if (game._canRemove(index)) widget.onMove(NineMove(-1, index));
       return;
     }
-    if (game.placed[game.side] < 9) {
+    if (game.placed[game.side] < game.pieceCount) {
       if (game.board[index] == 0) widget.onMove(NineMove(-1, index));
       return;
     }

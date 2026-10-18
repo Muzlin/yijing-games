@@ -11,6 +11,15 @@ import 'package:chess_app/games/impl/flying_chess_game.dart';
 import 'package:chess_app/games/impl/backgammon_game.dart';
 import 'package:chess_app/games/impl/shogi_game.dart';
 import 'package:chess_app/games/impl/tycoon_game.dart';
+import 'package:chess_app/games/impl/tic_tac_toe_game.dart';
+import 'package:chess_app/games/impl/five_field_kono_game.dart';
+import 'package:chess_app/games/impl/hex_game.dart';
+import 'package:chess_app/games/impl/dots_boxes_game.dart';
+import 'package:chess_app/games/impl/mancala_game.dart';
+import 'package:chess_app/games/impl/oware_game.dart';
+import 'package:chess_app/games/impl/hare_hounds_game.dart';
+import 'package:chess_app/games/impl/fox_geese_game.dart';
+import 'package:chess_app/games/impl/quoridor_game.dart';
 import 'package:chess_app/games/impl/doudizhu_game.dart';
 import 'package:chess_app/games/impl/mahjong_game.dart';
 import 'package:chess_app/games/impl/go_game.dart';
@@ -43,6 +52,16 @@ void main() {
     'tycoon': () => TycoonGame(),
     'doudizhu': () => DouDizhuGame(),
     'mahjong': () => MahjongGame(),
+    'ticTacToe': () => TicTacToeGame(),
+    'fiveFieldKono': () => FiveFieldKonoGame(),
+    'hex': () => HexGame(),
+    'dotsBoxes': () => DotsBoxesGame(),
+    'mancala': () => MancalaGame(),
+    'oware': () => OwareGame(),
+    'hareHounds': () => HareHoundsGame(),
+    'foxGeese': () => FoxGeeseGame(),
+    'quoridor': () => QuoridorGame(),
+    'twelveMensMorris': () => TwelveMensMorrisGame(),
   };
 
   for (final entry in games.entries) {

@@ -24,6 +24,16 @@ enum GameKind {
   tycoon,
   doudizhu,
   mahjong,
+  ticTacToe,
+  fiveFieldKono,
+  hex,
+  dotsBoxes,
+  mancala,
+  oware,
+  hareHounds,
+  foxGeese,
+  quoridor,
+  twelveMensMorris,
 }
 
 enum PlayMode { ai, local, aiVsAi, online }
@@ -62,6 +72,7 @@ class GameMatchConfig {
   final int boardSize;
   final String? opponentName;
   final bool useLlm;
+  final bool systemMouse;
 
   const GameMatchConfig({
     required this.meta,
@@ -71,6 +82,7 @@ class GameMatchConfig {
     this.boardSize = 0,
     this.opponentName,
     this.useLlm = false,
+    this.systemMouse = false,
   });
 
   bool get isOnline => mode == PlayMode.online;
@@ -348,6 +360,96 @@ class GameCatalog {
     sideLabels: ['红方', '蓝方'],
   );
 
+  static const ticTacToe = GameMeta(
+    kind: GameKind.ticTacToe,
+    title: '井字棋',
+    subtitle: '三子成线 · 3×3',
+    en: 'TIC-TAC-TOE',
+    accent: Color(0xFFD95B4E),
+    sideLabels: ['X 方', 'O 方'],
+  );
+
+  static const fiveFieldKono = GameMeta(
+    kind: GameKind.fiveFieldKono,
+    title: '五子飞',
+    subtitle: '五子换营 · 竞速',
+    en: 'FIVE FIELD KONO',
+    accent: Color(0xFF8FB36A),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const hex = GameMeta(
+    kind: GameKind.hex,
+    title: '六角棋',
+    subtitle: 'Hex · 上下对左右',
+    en: 'HEX',
+    accent: Color(0xFF6C9BD8),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const dotsBoxes = GameMeta(
+    kind: GameKind.dotsBoxes,
+    title: '点格棋',
+    subtitle: '画线围格 · 6×6 点',
+    en: 'DOTS & BOXES',
+    accent: Color(0xFFD7A74E),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const mancala = GameMeta(
+    kind: GameKind.mancala,
+    title: '曼卡拉',
+    subtitle: 'Kalah · 播种与俘获',
+    en: 'MANCALA',
+    accent: Color(0xFFC9855A),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const oware = GameMeta(
+    kind: GameKind.oware,
+    title: '播棋',
+    subtitle: 'Oware · 2×6 坑',
+    en: 'OWARE',
+    accent: Color(0xFFB78A54),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const hareHounds = GameMeta(
+    kind: GameKind.hareHounds,
+    title: '兔与猎犬',
+    subtitle: '三犬围兔 · 7×7',
+    en: 'HARE & HOUNDS',
+    accent: Color(0xFF79B36B),
+    sideLabels: ['野兔', '猎犬'],
+  );
+
+  static const foxGeese = GameMeta(
+    kind: GameKind.foxGeese,
+    title: '狐狸与鹅',
+    subtitle: '狐吃五鹅 · 十字棋盘',
+    en: 'FOX & GEESE',
+    accent: Color(0xFFD58A4E),
+    sideLabels: ['狐狸', '鹅群'],
+  );
+
+  static const quoridor = GameMeta(
+    kind: GameKind.quoridor,
+    title: '墙棋',
+    subtitle: '竞速 · 单格墙',
+    en: 'QUORIDOR',
+    accent: Color(0xFF6FB7B1),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const twelveMensMorris = GameMeta(
+    kind: GameKind.twelveMensMorris,
+    title: '十二子棋',
+    subtitle: '十二子 · 三连吃子',
+    en: "TWELVE MEN'S MORRIS",
+    accent: Color(0xFFB78A54),
+    sideLabels: ['黑方', '白方'],
+  );
+
   static const all = [
     chess,
     xiangqi,
@@ -370,6 +472,16 @@ class GameCatalog {
     tycoon,
     doudizhu,
     mahjong,
+    ticTacToe,
+    fiveFieldKono,
+    hex,
+    dotsBoxes,
+    mancala,
+    oware,
+    hareHounds,
+    foxGeese,
+    quoridor,
+    twelveMensMorris,
   ];
 
   static GameMeta of(GameKind kind) =>

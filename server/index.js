@@ -36,6 +36,16 @@ const ALLOWED_GAMES = new Set([
   'tycoon',
   'doudizhu',
   'mahjong',
+  'ticTacToe',
+  'fiveFieldKono',
+  'hex',
+  'dotsBoxes',
+  'mancala',
+  'oware',
+  'hareHounds',
+  'foxGeese',
+  'quoridor',
+  'twelveMensMorris',
 ]);
 
 const BOT_NAMES = [

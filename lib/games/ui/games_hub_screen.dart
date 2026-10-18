@@ -106,7 +106,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
       children: const [
         SizedBox(height: 16),
         Text(
-          '21 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
+          '31 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
           'AI 托管与本地 Ollama 大模型。',
           style: TextStyle(height: 1.7, fontSize: 13),
         ),
@@ -159,6 +159,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                   humanSide: session.mySide ?? 0,
                   boardSize: config.boardSize,
                   useLlm: config.useLlm,
+                  systemMouse: config.systemMouse,
                 ),
                 onlineSession: session,
                 opponentAlias: session.opponent?.name,
@@ -172,6 +173,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                 level: 3,
                 humanSide: session.mySide ?? 0,
                 boardSize: config.boardSize,
+                systemMouse: config.systemMouse,
               ),
               onlineSession: session,
             );
@@ -213,7 +215,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      '21 款经典棋牌 · 联机 / AI / 双人 / 托管',
+                      '31 款经典棋牌 · 联机 / AI / 双人 / 托管',
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -307,7 +309,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v2.0.3',
+                      '弈境 · 棋牌合集  v3.0.0',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,
@@ -669,6 +671,256 @@ class _GameArt extends StatelessWidget {
                 Transform.translate(
                   offset: Offset(-18.0 + i * 9, (i.isEven ? -4 : 4).toDouble()),
                   child: GameStone(white: i.isOdd, size: 17),
+                ),
+            ],
+          ),
+        );
+      case GameKind.ticTacToe:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 1; i < 3; i++) ...[
+                Transform.translate(
+                  offset: Offset((i - 1.5) * 22, 0),
+                  child: Container(width: 2, height: 66, color: const Color(0xFFC9A26B)),
+                ),
+                Transform.rotate(
+                  angle: pi / 2,
+                  child: Transform.translate(
+                    offset: Offset((i - 1.5) * 22, 0),
+                    child: Container(width: 2, height: 66, color: const Color(0xFFC9A26B)),
+                  ),
+                ),
+              ],
+              const Positioned(
+                left: 12,
+                top: 10,
+                child: Text('X',
+                    style: TextStyle(
+                        color: Color(0xFFD95B4E),
+                        fontSize: 25,
+                        fontWeight: FontWeight.w900)),
+              ),
+              const Positioned(
+                right: 12,
+                bottom: 10,
+                child: Text('O',
+                    style: TextStyle(
+                        color: Color(0xFF6C9BD8),
+                        fontSize: 25,
+                        fontWeight: FontWeight.w900)),
+              ),
+            ],
+          ),
+        );
+      case GameKind.fiveFieldKono:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 5; i++)
+                Transform.translate(
+                  offset: Offset(-20.0 + i * 10, (i.isEven ? -12 : 12).toDouble()),
+                  child: GameStone(white: i.isOdd, size: 15),
+                ),
+            ],
+          ),
+        );
+      case GameKind.hex:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(painter: _HexIconPainter()),
+        );
+      case GameKind.dotsBoxes:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(painter: _DotsIconPainter()),
+        );
+      case GameKind.mancala:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 6; i++)
+                Positioned(
+                  left: 8.0 + i * 11,
+                  top: i.isEven ? 18 : 38,
+                  child: Container(
+                    width: 10,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5A3523),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFFC9A26B)),
+                    ),
+                  ),
+                ),
+              for (var i = 0; i < 5; i++)
+                Positioned(
+                  left: 18.0 + i * 9,
+                  top: 29,
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE7BC6C),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.oware:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Wrap(
+            spacing: 5,
+            runSpacing: 6,
+            alignment: WrapAlignment.center,
+            children: [
+              for (var i = 0; i < 12; i++)
+                Container(
+                  width: 13,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: i < 6
+                        ? const Color(0xFFD95B4E).withValues(alpha: 0.75)
+                        : const Color(0xFF6C9BD8).withValues(alpha: 0.75),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.hareHounds:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const GameDisc(
+                label: '兔',
+                color: Color(0xFFF6F0E4),
+                background: Color(0xFFF6F0E4),
+                filled: true,
+                size: 32,
+                fontSize: 16,
+              ),
+              for (final p in const [Offset(-22, -18), Offset(0, 22), Offset(22, -18)])
+                Transform.translate(
+                  offset: p,
+                  child: const GameDisc(
+                    label: '犬',
+                    color: Color(0xFFB78A54),
+                    background: Color(0xFFB78A54),
+                    filled: true,
+                    size: 17,
+                    fontSize: 9,
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.foxGeese:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const GameDisc(
+                label: '狐',
+                color: Color(0xFFD95B4E),
+                background: Color(0xFFD95B4E),
+                filled: true,
+                size: 34,
+                fontSize: 17,
+              ),
+              for (var i = 0; i < 5; i++)
+                Transform.translate(
+                  offset: Offset(-22.0 + i * 11, -22),
+                  child: const GameDisc(
+                    label: '鹅',
+                    color: Color(0xFFF6F0E4),
+                    background: Color(0xFFF6F0E4),
+                    filled: true,
+                    size: 14,
+                    fontSize: 7,
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.quoridor:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 4; i++)
+                Positioned(
+                  left: 12.0 + i * 12,
+                  top: 12.0 + i * 12,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    color: const Color(0xFF6A4A2B),
+                  ),
+                ),
+              const Positioned(
+                left: 13,
+                bottom: 13,
+                child: GameDisc(
+                  label: '红',
+                  color: Color(0xFFD95B4E),
+                  background: Color(0xFFD95B4E),
+                  filled: true,
+                  size: 18,
+                  fontSize: 8,
+                ),
+              ),
+              const Positioned(
+                right: 13,
+                top: 13,
+                child: GameDisc(
+                  label: '蓝',
+                  color: Color(0xFF6C9BD8),
+                  background: Color(0xFF6C9BD8),
+                  filled: true,
+                  size: 18,
+                  fontSize: 8,
+                ),
+              ),
+            ],
+          ),
+        );
+      case GameKind.twelveMensMorris:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 12; i++)
+                Transform.translate(
+                  offset: Offset(
+                    cos(i * pi / 6) * 24,
+                    sin(i * pi / 6) * 24,
+                  ),
+                  child: GameStone(white: i.isOdd, size: 11),
                 ),
             ],
           ),
@@ -1137,4 +1389,59 @@ class _RoundButton extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class _HexIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final path = Path();
+    for (var i = 0; i < 6; i++) {
+      final a = -pi / 2 + i * pi / 3;
+      final p = c + Offset(cos(a), sin(a)) * 26;
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(
+      path,
+      Paint()..color = const Color(0xFF6C9BD8).withValues(alpha: 0.35),
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = const Color(0xFF6C9BD8),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _HexIconPainter oldDelegate) => false;
+}
+
+class _DotsIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = const Color(0xFFD7A74E);
+    for (var r = 0; r < 3; r++) {
+      for (var c = 0; c < 3; c++) {
+        canvas.drawCircle(Offset(16.0 + c * 14, 16.0 + r * 14), 2.5, paint);
+      }
+    }
+    final line = Paint()
+      ..color = const Color(0xFFD95B4E)
+      ..strokeWidth = 2;
+    canvas.drawLine(const Offset(16, 16), const Offset(30, 16), line);
+    canvas.drawLine(const Offset(30, 16), const Offset(30, 30), line);
+    canvas.drawLine(const Offset(16, 30), const Offset(30, 30), line);
+    canvas.drawLine(const Offset(16, 16), const Offset(16, 30), line);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DotsIconPainter oldDelegate) => false;
 }
