@@ -6,6 +6,8 @@ import '../core/chess.dart';
 import '../account/account_manager.dart';
 import '../game/chess_game.dart';
 import '../game/models.dart';
+import '../games/core/game_core.dart';
+import '../games/ui/game_rules_text.dart';
 import '../online/online_session.dart';
 import 'sound.dart';
 import 'theme.dart';
@@ -524,6 +526,11 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
         _CircleButton(
+          icon: Icons.menu_book_rounded,
+          onTap: _showRules,
+        ),
+        const SizedBox(width: 8),
+        _CircleButton(
           icon: AppSound.enabled
               ? Icons.volume_up_rounded
               : Icons.volume_off_rounded,
@@ -535,6 +542,100 @@ class _GameScreenState extends State<GameScreen> {
           onTap: _confirmNewGame,
         ),
       ],
+    );
+  }
+
+
+  void _showRules() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        constraints: const BoxConstraints(maxWidth: 620),
+        margin: const EdgeInsets.fromLTRB(12, 40, 12, 16),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceHigh,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
+          boxShadow: const [
+            BoxShadow(color: Colors.black54, blurRadius: 40, offset: Offset(0, 18)),
+          ],
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.gold.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Text(
+                      'CHESS',
+                      style: TextStyle(
+                        fontSize: 9,
+                        letterSpacing: 1.6,
+                        color: AppColors.gold,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    color: AppColors.muted,
+                    tooltip: '关闭',
+                  ),
+                ],
+              ),
+              const Text(
+                '国际象棋',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '经典 · 64 格',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.muted,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SelectableText(
+                gameRulesText(GameKind.chess),
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.75,
+                  color: AppColors.ivory,
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.gold,
+                    foregroundColor: const Color(0xFF101B1E),
+                  ),
+                  child: const Text('知道了'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
