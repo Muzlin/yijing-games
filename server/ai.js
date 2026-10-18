@@ -1,8 +1,8 @@
 'use strict';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:1.5b';
-const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 20000);
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:32b';
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 90000);
 
 function json(res, status, payload) {
   res.writeHead(status, {
@@ -91,7 +91,7 @@ async function callOllama(prompt, model, temperature) {
         model,
         prompt,
         stream: false,
-        keep_alive: '10m',
+        keep_alive: '30m',
         options: {
           temperature,
           num_predict: 8,
@@ -133,7 +133,7 @@ async function pickMove(payload) {
   const legalMoves = Array.isArray(payload.legalMoves)
     ? payload.legalMoves
         .filter((m) => m && typeof m.id === 'string')
-        .slice(0, 80)
+        .slice(0, 8)
     : [];
   if (legalMoves.length === 0) return { move: null, source: 'no-legal-moves' };
   if (legalMoves.length === 1) {
@@ -199,6 +199,7 @@ async function handleAiRequest(req, res) {
 }
 
 async function handleAiHealth(req, res) {
+  warmUp();
   const started = Date.now();
   try {
     const response = await fetch(`${OLLAMA_URL}/api/tags`, {
@@ -224,4 +225,28 @@ async function handleAiHealth(req, res) {
   }
 }
 
-module.exports = { handleAiRequest, handleAiHealth };
+let warmed = false;
+async function warmUp() {
+  if (warmed) return;
+  warmed = true;
+  try {
+    await fetch(`${OLLAMA_URL}/api/generate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: AbortSignal.timeout(120000),
+      body: JSON.stringify({
+        model: OLLAMA_MODEL,
+        prompt: 'ok',
+        stream: false,
+        keep_alive: '30m',
+        options: { num_predict: 1, temperature: 0 },
+      }),
+    });
+    console.log(`[ai] warmed ${OLLAMA_MODEL}`);
+  } catch (error) {
+    warmed = false;
+    console.log('[ai] warmup failed:', error.message);
+  }
+}
+
+module.exports = { handleAiRequest, handleAiHealth, warmUp };

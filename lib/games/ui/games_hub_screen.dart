@@ -60,7 +60,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境 · 棋牌合集',
-      applicationVersion: '1.2.2',
+      applicationVersion: '1.2.3',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -244,7 +244,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v1.2.2',
+                      '弈境 · 棋牌合集  v1.2.3',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,

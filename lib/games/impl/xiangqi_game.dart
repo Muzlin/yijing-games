@@ -259,8 +259,14 @@ class XiangqiGame extends TurnGame {
       if (r < 0 || r >= rows || c < 0 || c >= cols) continue;
       final piece = board[r * cols + c];
       if (piece == 0 || _colorOf(piece) != by || _typeOf(piece) != 4) continue;
-      final legRow = r + (move[0].abs() == 2 ? move[0] ~/ 2 : 0);
-      final legCol = c + (move[1].abs() == 2 ? move[1] ~/ 2 : 0);
+      // (r, c) is the horse square relative to the target, so the leg is one
+      // step back toward the target (the opposite sign from the horse's own
+      // move generation).
+      final legRow = r - (move[0].abs() == 2 ? move[0] ~/ 2 : 0);
+      final legCol = c - (move[1].abs() == 2 ? move[1] ~/ 2 : 0);
+      if (legRow < 0 || legRow >= rows || legCol < 0 || legCol >= cols) {
+        continue;
+      }
       if (board[legRow * cols + legCol] == 0) return true;
     }
 
@@ -510,9 +516,9 @@ class XiangqiGame extends TurnGame {
   }
 
   int _search(int depth, int alpha, int beta, int ply) {
+    if (depth <= 0) return _quiescence(alpha, beta, ply, 0);
     final moves = _allLegalMoves(_side);
     if (moves.isEmpty) return -100000 + ply;
-    if (depth <= 0) return _evaluate();
     moves.sort((a, b) {
       final av = board[a % cells] == 0 ? 0 : _typeOf(board[a % cells]);
       final bv = board[b % cells] == 0 ? 0 : _typeOf(board[b % cells]);
@@ -526,6 +532,38 @@ class XiangqiGame extends TurnGame {
       _unmake(undo);
       if (score > alpha) alpha = score;
       if (alpha >= beta) break;
+    }
+    return alpha;
+  }
+
+  /// Capture-only search to avoid horizon blunders (losing a piece after the
+  /// nominal depth has been reached).
+  int _quiescence(int alpha, int beta, int ply, int qdepth) {
+    final inCheck = isInCheck(_side);
+    if (!inCheck) {
+      final stand = _evaluate();
+      if (stand >= beta) return beta;
+      if (stand > alpha) alpha = stand;
+    }
+    if (qdepth >= 6) return alpha;
+    var moves = _allLegalMoves(_side);
+    if (moves.isEmpty) return -100000 + ply;
+    if (!inCheck) {
+      moves = moves.where((m) => board[m % cells] != 0).toList();
+    }
+    moves.sort((a, b) {
+      final av = board[a % cells] == 0 ? 0 : _typeOf(board[a % cells]);
+      final bv = board[b % cells] == 0 ? 0 : _typeOf(board[b % cells]);
+      return bv.compareTo(av);
+    });
+    for (final move in moves) {
+      final undo = _make(move ~/ cells, move % cells);
+      _side = 1 - _side;
+      final score = -_quiescence(-beta, -alpha, ply + 1, qdepth + 1);
+      _side = 1 - _side;
+      _unmake(undo);
+      if (score >= beta) return beta;
+      if (score > alpha) alpha = score;
     }
     return alpha;
   }

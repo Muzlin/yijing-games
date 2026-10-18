@@ -396,38 +396,9 @@ class ChessGame extends ChangeNotifier {
     final legalMoves = position.legalMoves();
     final int level = assisted ? 3 : config.difficulty.index;
 
-    // Optional local large-model brain for regular AI turns. The bridge can
-    // only choose from the legal moves below, and anything invalid falls back
-    // to the engine. AI 托管 always uses the strongest (master) engine search.
-    if (AiBridge.enabled && !assisted && legalMoves.isNotEmpty) {
-      final recent = _sans.length > 10
-          ? _sans.sublist(_sans.length - 10)
-          : List<String>.of(_sans);
-      final options = <AiMoveOption>[
-        for (final move in legalMoves)
-          AiMoveOption(id: uciForMove(move), label: position.sanFor(move)),
-      ];
-      final llmId = await AiBridge.chooseMove(
-        game: 'chess',
-        state: 'FEN: $fen\n最近着法: ${recent.isEmpty ? '无' : recent.join(' ')}',
-        moves: options,
-        player: mover,
-        level: level,
-      );
-      if (_disposed || generation != _aiGeneration) return;
-      if (llmId != null) {
-        for (final move in legalMoves) {
-          if (uciForMove(move) == llmId) {
-            thinking = false;
-            thinkingSide = null;
-            aiNote = '本地模型 · ${OnlineConfig.aiModel}';
-            _applyMove(move, fromAi: true);
-            return;
-          }
-        }
-      }
-    }
-
+    // 1) Let the engine produce a strong baseline move. This also gives the
+    //    local model a short, good shortlist instead of 20+ legal moves, which
+    //    makes 32B prompts fast and prevents it from picking a random move.
     final seed = DateTime.now().microsecondsSinceEpoch & 0x7FFFFFFF;
     Map<String, Object?>? result;
     try {
@@ -442,24 +413,88 @@ class ChessGame extends ChangeNotifier {
     } catch (_) {
       result = null;
     }
+    if (_disposed || generation != _aiGeneration) return;
+    final engineMove =
+        result != null && result['move'] is int ? result['move'] as int : null;
+
+    // 2) If the local model is enabled, let it choose between the engine's
+    //    best move and up to 7 tactical alternatives. It can only pick a
+    //    legal move from this shortlist; otherwise the engine move is used.
+    //    AI 托管 always skips the model and uses the master engine.
+    if (AiBridge.enabled &&
+        !assisted &&
+        engineMove != null &&
+        status == GameStatus.playing &&
+        position.side == mover &&
+        position.toFen() == fen) {
+      final others = legalMoves.where((m) => m != engineMove).toList();
+      others.sort((a, b) => _moveTacticScore(b).compareTo(_moveTacticScore(a)));
+      final shortlist = <int>[engineMove, ...others.take(7)];
+      final recent = _sans.length > 10
+          ? _sans.sublist(_sans.length - 10)
+          : List<String>.of(_sans);
+      final options = <AiMoveOption>[
+        for (final move in shortlist)
+          AiMoveOption(id: uciForMove(move), label: position.sanFor(move)),
+      ];
+      final llmId = await AiBridge.chooseMove(
+        game: 'chess',
+        state: 'FEN: $fen\n最近着法: ${recent.isEmpty ? '无' : recent.join(' ')}',
+        moves: options,
+        player: mover,
+        level: level,
+      );
+      if (_disposed || generation != _aiGeneration) return;
+      if (llmId != null) {
+        for (final move in shortlist) {
+          if (uciForMove(move) == llmId) {
+            thinking = false;
+            thinkingSide = null;
+            aiNote = '本地模型 · ${OnlineConfig.aiModel}';
+            _applyMove(move, fromAi: true);
+            return;
+          }
+        }
+      }
+    }
 
     if (_disposed || generation != _aiGeneration) return;
     thinking = false;
     thinkingSide = null;
-    if (result != null &&
+    if (engineMove != null &&
         status == GameStatus.playing &&
         position.side == mover &&
-        position.toFen() == fen) {
-      final move = result['move'];
-      if (move is int && position.legalMoves().contains(move)) {
-        aiNote = assisted
-            ? '大师引擎 · 深度 ${result['depth']}'
-            : '深度 ${result['depth']} · 评分 ${result['score']}';
-        _applyMove(move, fromAi: true);
-        return;
-      }
+        position.toFen() == fen &&
+        legalMoves.contains(engineMove)) {
+      aiNote = assisted
+          ? '大师引擎 · 深度 ${result?['depth']}'
+          : '深度 ${result?['depth']} · 评分 ${result?['score']}';
+      _applyMove(engineMove, fromAi: true);
+      return;
     }
     _safeNotify();
+  }
+
+  int _moveTacticScore(int move) {
+    final target = position.pieceAt(moveTo(move));
+    final promo = movePromotion(move);
+    var score = 0;
+    if (target != 0) {
+      score += switch (typeOf(target)) {
+        pawn => 1,
+        knight => 3,
+        bishop => 3,
+        rook => 5,
+        queen => 9,
+        king => 100,
+        _ => 0,
+      };
+    }
+    if (promo != 0) score += 8;
+    final to = moveTo(move);
+    final file = to & 7;
+    score += 3 - ((file - 3.5).abs() ~/ 1).clamp(0, 3);
+    return score;
   }
 
   Future<void> requestHint() async {

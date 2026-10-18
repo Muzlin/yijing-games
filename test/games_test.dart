@@ -92,6 +92,16 @@ void main() {
       expect(targets, contains(7 * 9 + 2));
     });
 
+    test('horse check respects the leg', () {
+      final game = XiangqiGame();
+      game.board.fillRange(0, 90, 0);
+      game.board[9 * 9 + 4] = 0 * 16 + 1; // red king
+      game.board[7 * 9 + 5] = 1 * 16 + 4; // black horse
+      expect(game.isInCheck(0), isTrue);
+      game.board[8 * 9 + 5] = 0 * 16 + 7; // block the horse leg
+      expect(game.isInCheck(0), isFalse);
+    });
+
     test('flying general is check', () {
       final game = XiangqiGame();
       game.board.fillRange(0, 90, 0);

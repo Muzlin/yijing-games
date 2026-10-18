@@ -3,7 +3,7 @@
 const http = require('http');
 const crypto = require('crypto');
 const { WebSocketServer } = require('ws');
-const { handleAiRequest, handleAiHealth } = require('./ai');
+const { handleAiRequest, handleAiHealth, warmUp } = require('./ai');
 const {
   handleAuthRequest,
   accountByToken,
@@ -434,4 +434,7 @@ function log(...args) {
 server.listen(PORT, () => {
   console.log(`Yijing online server listening on :${PORT}`);
   console.log(`Bot fallback after ${BOT_WAIT_MS} ms`);
+  // Load the 32B model in the background so the first AI move is not delayed
+  // by a cold 10-20 second model load.
+  warmUp();
 });

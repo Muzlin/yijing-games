@@ -27,7 +27,7 @@
 - **联机对战**：公网 WebSocket 匹配在线玩家，随机分配先后手；匹配不到真人时由服务端安排一位“在线对手”应战。
 - **账号系统**：手机号 + 密码注册/登录、PBKDF2 密码哈希、HMAC-SHA256 令牌（30 天）、昵称、ELO、胜负和。
 - **AI 托管 / 辅助**：AI 代下、托管自动落子；联机中也可使用提示与托管。托管固定使用最高难度的引擎。
-- **本地大模型 AI**：可接入本机 Ollama（默认 `qwen2.5:1.5b`），模型只能从规则引擎给出的合法着法中选择，非法输出自动回退；棋力不足时回退内置引擎。托管使用大师级引擎而不是模型。
+- **本地大模型 AI**：国际象棋可使用本机 Ollama（默认 `qwen2.5:32b`），模型只能从规则引擎给出的合法着法中选择，非法输出自动回退；AI 托管使用内置大师引擎。
 - **完整对局体验**：合法落点、上一步高亮、将军提示、悔棋、认输/停一手、翻盘、结果统计、音效与震动。
 - **自动存档**：国际象棋本地对局自动保存，可从棋牌合集继续。
 - **适配**：手机竖屏与平板/桌面宽屏，支持 iOS、Android、macOS、Web。
@@ -60,7 +60,7 @@ flutter build apk --release \
   --dart-define=ONLINE_SERVER_URL=wss://game.example.com/ws \
   --dart-define=ACCOUNT_SERVER_URL=https://game.example.com \
   --dart-define=AI_BRIDGE_URL=https://game.example.com \
-  --dart-define=AI_MODEL=qwen2.5:1.5b
+  --dart-define=AI_MODEL=qwen2.5:32b
 ```
 
 局域网测试可换成 Mac 的局域网 IP。公网部署、HTTPS/WSS、Docker、数据持久化与安全说明见 [`server/README.md`](server/README.md)。

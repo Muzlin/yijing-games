@@ -292,7 +292,7 @@ class JunqiGame extends TurnGame {
       0 => 1,
       1 => 2,
       2 => 3,
-      _ => 3,
+      _ => 4,
     };
     final position = _JunqiPosition(List<int>.of(board), _side, _noCapture, _moveCount);
     final result = _search(position, depth, -1000000, 1000000, level == 0);
@@ -306,9 +306,9 @@ class JunqiGame extends TurnGame {
     int beta,
     bool randomise,
   ) {
+    if (depth <= 0) return (_quiesce(position, alpha, beta, 0), null);
     final moves = _movesFor(position);
     if (moves.isEmpty) return (-900000 + (6 - depth) * 100, null);
-    if (depth <= 0) return (_evaluate(position), null);
     final scored = <(List<int>, int)>[];
     for (final move in moves) {
       final applied = _applyPosition(position, move);
@@ -328,6 +328,30 @@ class JunqiGame extends TurnGame {
       return (chosen.$2, chosen.$1);
     }
     return (scored.first.$2, scored.first.$1);
+  }
+
+  int _quiesce(_JunqiPosition position, int alpha, int beta, int qdepth) {
+    final stand = _evaluate(position);
+    if (stand >= beta) return beta;
+    if (stand > alpha) alpha = stand;
+    if (qdepth >= 3) return alpha;
+    final moves = _movesFor(position)
+        .where((move) => position.board[move[1]] != 0)
+        .toList();
+    if (moves.isEmpty) return alpha;
+    moves.sort((a, b) {
+      final av = _codeOf(position.board[a[1]]);
+      final bv = _codeOf(position.board[b[1]]);
+      return bv.compareTo(av);
+    });
+    for (final move in moves) {
+      final applied = _applyPosition(position, move);
+      if (applied.$2 != null) return 900000 - qdepth;
+      final score = -_quiesce(applied.$1, -beta, -alpha, qdepth + 1);
+      if (score >= beta) return beta;
+      if (score > alpha) alpha = score;
+    }
+    return alpha;
   }
 
   List<List<int>> _movesFor(_JunqiPosition position) {

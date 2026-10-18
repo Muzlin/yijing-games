@@ -350,9 +350,9 @@ class JungleGame extends TurnGame {
     int beta,
     bool randomise,
   ) {
+    if (depth <= 0) return (_quiesce(position, alpha, beta, 0), null);
     final moves = _movesFor(position);
     if (moves.isEmpty) return (-900000 + (8 - depth) * 100, null);
-    if (depth <= 0) return (_evaluate(position), null);
     final scored = <(List<int>, int)>[];
     for (final move in moves) {
       final next = _applyPosition(position, move);
@@ -372,6 +372,38 @@ class JungleGame extends TurnGame {
       return (chosen.$2, chosen.$1);
     }
     return (scored.first.$2, scored.first.$1);
+  }
+
+  int _quiesce(_JunglePosition position, int alpha, int beta, int qdepth) {
+    final stand = _evaluate(position);
+    if (stand >= beta) return beta;
+    if (stand > alpha) alpha = stand;
+    if (qdepth >= 4) return alpha;
+    final moves = _movesFor(position).where((move) {
+      final to = move[1];
+      final row = to ~/ cols;
+      final col = to % cols;
+      return position.board[to] != 0 ||
+          _isDen(row, col, 1 - position.side);
+    }).toList();
+    if (moves.isEmpty) return alpha;
+    moves.sort((a, b) {
+      final av = position.board[a[1]] == 0
+          ? 0
+          : _rankOf(position.board[a[1]]);
+      final bv = position.board[b[1]] == 0
+          ? 0
+          : _rankOf(position.board[b[1]]);
+      return bv.compareTo(av);
+    });
+    for (final move in moves) {
+      final applied = _applyPosition(position, move);
+      if (applied.$2 != null) return 900000 - qdepth;
+      final score = -_quiesce(applied.$1, -beta, -alpha, qdepth + 1);
+      if (score >= beta) return beta;
+      if (score > alpha) alpha = score;
+    }
+    return alpha;
   }
 
   List<List<int>> _movesFor(_JunglePosition position) {

@@ -16,7 +16,7 @@ class OnlineConfig {
 
   static const String aiModel = String.fromEnvironment(
     'AI_MODEL',
-    defaultValue: 'qwen2.5:1.5b',
+    defaultValue: 'qwen2.5:32b',
   );
 
   /// Account API lives on the same host as the relay by default.

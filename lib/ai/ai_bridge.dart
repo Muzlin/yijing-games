@@ -35,7 +35,7 @@ class AiBridge {
     try {
       final response = await http
           .get(Uri.parse('${OnlineConfig.aiBridgeUrl}/ai/health'))
-          .timeout(const Duration(seconds: 3));
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode != 200) {
         available = false;
         return false;
@@ -82,7 +82,7 @@ class AiBridge {
               ],
             }),
           )
-          .timeout(const Duration(seconds: 22));
+          .timeout(const Duration(seconds: 90));
       if (response.statusCode != 200) return null;
       final data = jsonDecode(response.body);
       if (data is! Map) return null;

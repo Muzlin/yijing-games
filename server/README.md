@@ -26,17 +26,17 @@ curl http://127.0.0.1:8787/ai/health
 
 ### 使用本机 Ollama
 
-服务默认调用 `http://127.0.0.1:11434`，模型 `qwen2.5:1.5b`：
+服务默认调用 `http://127.0.0.1:11434`，模型 `qwen2.5:32b`（首次加载约 10–20 秒，之后常驻 10 分钟）：
 
 ```bash
 ollama list
-OLLAMA_MODEL=qwen2.5:1.5b node index.js
+OLLAMA_MODEL=qwen2.5:32b node index.js
 ```
 
 如需 32B：
 
 ```bash
-OLLAMA_MODEL=qwen2.5:32b AI_TIMEOUT_MS=60000 node index.js
+OLLAMA_MODEL=qwen2.5:1.5b AI_TIMEOUT_MS=20000 node index.js
 ```
 
 ### 环境变量
@@ -50,8 +50,8 @@ OLLAMA_MODEL=qwen2.5:32b AI_TIMEOUT_MS=60000 node index.js
 | `ACCOUNT_TOKEN_TTL` | `2592000` | 登录有效期（秒），默认 30 天 |
 | `QUICK_LOGIN` | `false` | 是否允许只凭手机号快捷登录/建号 |
 | `OLLAMA_URL` | `http://127.0.0.1:11434` | Ollama 地址 |
-| `OLLAMA_MODEL` | `qwen2.5:1.5b` | 默认模型 |
-| `AI_TIMEOUT_MS` | `20000` | 单次模型调用超时 |
+| `OLLAMA_MODEL` | `qwen2.5:32b` | 默认模型 |
+| `AI_TIMEOUT_MS` | `90000` | 单次模型调用超时 |
 | `LOG_LEVEL` | - | 设为 `quiet` 关闭日志 |
 
 ### 数据
@@ -189,7 +189,7 @@ flutter build apk --release \
   --dart-define=ONLINE_SERVER_URL=wss://game.example.com/ws \
   --dart-define=ACCOUNT_SERVER_URL=https://game.example.com \
   --dart-define=AI_BRIDGE_URL=https://game.example.com \
-  --dart-define=AI_MODEL=qwen2.5:1.5b
+  --dart-define=AI_MODEL=qwen2.5:32b
 ```
 
 其他设备安装这个 APK 后即可使用公网账号与匹配。“别的设备的 AI”只需要能访问同一个 `AI_BRIDGE_URL`，模型仍然运行在你的 Ollama 主机上；把服务端代码推到 Git 后在服务器上部署即可。

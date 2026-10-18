@@ -25,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   GameMode _mode = GameMode.ai;
-  Difficulty _difficulty = Difficulty.casual;
+  Difficulty _difficulty = Difficulty.skilled;
   int _sideChoice = white; // -1 = random
   SavedGame? _saved;
   bool _loadingSaved = true;
@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showAboutDialog(
       context: context,
       applicationName: '弈境国际象棋',
-      applicationVersion: '1.2.2',
+      applicationVersion: '1.2.3',
       applicationIcon: Container(
         width: 52,
         height: 52,
@@ -236,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           '一款专注于纯粹对弈体验的国际象棋应用。支持人机对战、双人对弈、'
           'AI 自动对弈观战、公网联机、账号系统，以及大师级 AI 托管。'
-          'AI 可由本机 Ollama 大模型驱动，也可回退到内置引擎。',
+          'AI 可由本机 Ollama 大模型驱动；托管使用大师级引擎。',
           style: TextStyle(height: 1.7, fontSize: 13),
         ),
       ],
@@ -365,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '弈境 · 国际象棋  v1.2.2',
+                          '弈境 · 国际象棋  v1.2.3',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 10.5,
