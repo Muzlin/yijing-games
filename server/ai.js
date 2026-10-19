@@ -98,6 +98,11 @@ const GAME_RULES = {
   foxGeese: '7x7 十字狐狸与鹅；狐狸走一格或跳吃鹅，鹅向下/横走；狐狸吃 5 鹅胜，鹅围困狐狸胜。',
   quoridor: '9x9 墙棋简化版；红从左到右、蓝从右到左，每次走一格或放单格墙，不能完全堵死；先到对方底线胜。',
   twelveMensMorris: '十二子棋，24 点，双方各 12 子；三连吃子，少于 3 子或无法移动者负；无飞子。',
+  sixMensMorris: '六子冲，16 点，双方各 6 子；三连吃子，少于 3 子或无法移动者负；无飞子。',
+  threeMensMorris: '三三棋，3x3，双方各 3 子；先布子后走子，三子成线者胜。',
+  quarto: '夸托（Quarto），4x4，16 枚棋子四种属性；每回合选一枚剩余棋子放置，四子共享任一属性者胜。',
+  yote: '约特棋（Yoté），5x6，双方各 12 子；布子、走子或跳吃，吃光/堵死对方者胜。',
+  onitama: '鬼将棋（Onitama），5x5，每方 1 主将 + 4 弟子、2 张移动卡和 1 张公共卡；吃主将或主将进王座者胜。',
 };
 
 function json(res, status, payload) {
@@ -197,6 +202,11 @@ function gameName(game) {
     foxGeese: '狐狸与鹅',
     quoridor: '墙棋',
     twelveMensMorris: '十二子棋',
+    sixMensMorris: '六子冲',
+    threeMensMorris: '三三棋',
+    quarto: '夸托',
+    yote: '约特棋',
+    onitama: '鬼将棋',
   };
   return names[game] || '棋类游戏';
 }

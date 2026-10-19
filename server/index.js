@@ -46,6 +46,11 @@ const ALLOWED_GAMES = new Set([
   'foxGeese',
   'quoridor',
   'twelveMensMorris',
+  'sixMensMorris',
+  'threeMensMorris',
+  'quarto',
+  'yote',
+  'onitama',
 ]);
 
 const BOT_NAMES = [

@@ -34,6 +34,11 @@ enum GameKind {
   foxGeese,
   quoridor,
   twelveMensMorris,
+  sixMensMorris,
+  threeMensMorris,
+  quarto,
+  yote,
+  onitama,
 }
 
 enum PlayMode { ai, local, aiVsAi, online }
@@ -450,6 +455,52 @@ class GameCatalog {
     sideLabels: ['黑方', '白方'],
   );
 
+  static const sixMensMorris = GameMeta(
+    kind: GameKind.sixMensMorris,
+    title: '六子冲',
+    subtitle: '十六点 · 六子三连',
+    en: "SIX MEN'S MORRIS",
+    accent: Color(0xFFB78A54),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const threeMensMorris = GameMeta(
+    kind: GameKind.threeMensMorris,
+    title: '三三棋',
+    subtitle: '3×3 · 三子成线',
+    en: "THREE MEN'S MORRIS",
+    accent: Color(0xFFC9855A),
+    sideLabels: ['黑方', '白方'],
+  );
+
+  static const quarto = GameMeta(
+    kind: GameKind.quarto,
+    title: '夸托',
+    subtitle: '四属性 · 四子连线',
+    en: 'QUARTO',
+    accent: Color(0xFFD7A74E),
+    sideLabels: ['红方', '蓝方'],
+  );
+
+  static const yote = GameMeta(
+    kind: GameKind.yote,
+    title: '约特棋',
+    subtitle: '5×6 · 布子与跳吃',
+    en: 'YOTÉ',
+    accent: Color(0xFF79B36B),
+    sideLabels: ['红方', '蓝方'],
+    aspectRatio: 1.15,
+  );
+
+  static const onitama = GameMeta(
+    kind: GameKind.onitama,
+    title: '鬼将棋',
+    subtitle: '移动卡 · 主将对决',
+    en: 'ONITAMA',
+    accent: Color(0xFFD58A4E),
+    sideLabels: ['红方', '蓝方'],
+  );
+
   static const all = [
     chess,
     xiangqi,
@@ -482,6 +533,11 @@ class GameCatalog {
     foxGeese,
     quoridor,
     twelveMensMorris,
+    sixMensMorris,
+    threeMensMorris,
+    quarto,
+    yote,
+    onitama,
   ];
 
   static GameMeta of(GameKind kind) =>

@@ -19,6 +19,11 @@ import '../impl/mancala_game.dart';
 import '../impl/nine_mens_morris_game.dart';
 import '../impl/oware_game.dart';
 import '../impl/quoridor_game.dart';
+import '../impl/onitama_game.dart';
+import '../impl/yote_game.dart';
+import '../impl/quarto_game.dart';
+import '../impl/three_mens_morris_game.dart';
+import '../impl/six_mens_morris_game.dart';
 import '../impl/reversi_game.dart';
 import '../impl/snakes_game.dart';
 import '../impl/shogi_game.dart';
@@ -80,6 +85,16 @@ class GameRegistry {
         return QuoridorGame();
       case GameKind.twelveMensMorris:
         return TwelveMensMorrisGame();
+      case GameKind.sixMensMorris:
+        return SixMensMorrisGame();
+      case GameKind.threeMensMorris:
+        return ThreeMensMorrisGame();
+      case GameKind.quarto:
+        return QuartoGame();
+      case GameKind.yote:
+        return YoteGame();
+      case GameKind.onitama:
+        return OnitamaGame();
       case GameKind.go:
         return GoGame(size: boardSize == 13 ? 13 : 9);
       case GameKind.xiangqi:

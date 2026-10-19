@@ -11,6 +11,11 @@ import 'package:chess_app/games/impl/flying_chess_game.dart';
 import 'package:chess_app/games/impl/backgammon_game.dart';
 import 'package:chess_app/games/impl/shogi_game.dart';
 import 'package:chess_app/games/impl/tycoon_game.dart';
+import 'package:chess_app/games/impl/six_mens_morris_game.dart';
+import 'package:chess_app/games/impl/three_mens_morris_game.dart';
+import 'package:chess_app/games/impl/quarto_game.dart';
+import 'package:chess_app/games/impl/yote_game.dart';
+import 'package:chess_app/games/impl/onitama_game.dart';
 import 'package:chess_app/games/impl/tic_tac_toe_game.dart';
 import 'package:chess_app/games/impl/five_field_kono_game.dart';
 import 'package:chess_app/games/impl/hex_game.dart';
@@ -62,6 +67,11 @@ void main() {
     'foxGeese': () => FoxGeeseGame(),
     'quoridor': () => QuoridorGame(),
     'twelveMensMorris': () => TwelveMensMorrisGame(),
+    'sixMensMorris': () => SixMensMorrisGame(),
+    'threeMensMorris': () => ThreeMensMorrisGame(),
+    'quarto': () => QuartoGame(),
+    'yote': () => YoteGame(),
+    'onitama': () => OnitamaGame(),
   };
 
   for (final entry in games.entries) {

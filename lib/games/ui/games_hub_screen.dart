@@ -106,7 +106,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
       children: const [
         SizedBox(height: 16),
         Text(
-          '31 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
+          '36 款经典棋牌，支持人机、双人、AI 对战、公网联机、账号系统、'
           'AI 托管与本地 Ollama 大模型。',
           style: TextStyle(height: 1.7, fontSize: 13),
         ),
@@ -215,7 +215,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      '31 款经典棋牌 · 联机 / AI / 双人 / 托管',
+                      '36 款经典棋牌 · 联机 / AI / 双人 / 托管',
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -309,7 +309,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v3.0.0',
+                      '弈境 · 棋牌合集  v3.1.0',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,
@@ -921,6 +921,124 @@ class _GameArt extends StatelessWidget {
                     sin(i * pi / 6) * 24,
                   ),
                   child: GameStone(white: i.isOdd, size: 11),
+                ),
+            ],
+          ),
+        );
+      case GameKind.sixMensMorris:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 2; i++)
+                Container(
+                  width: size * (0.78 - i * 0.24),
+                  height: size * (0.78 - i * 0.24),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFC9A26B), width: 2),
+                  ),
+                ),
+              for (var i = 0; i < 6; i++)
+                Transform.rotate(
+                  angle: i * pi / 3,
+                  child: Transform.translate(
+                    offset: const Offset(0, -23),
+                    child: GameStone(white: i.isOdd, size: 9),
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.threeMensMorris:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Transform.translate(
+                  offset: Offset(-20.0 + i * 20, -20),
+                  child: GameStone(white: false, size: 11),
+                ),
+              for (var i = 0; i < 3; i++)
+                Transform.translate(
+                  offset: Offset(-20.0 + i * 20, 20),
+                  child: GameStone(white: true, size: 11),
+                ),
+            ],
+          ),
+        );
+      case GameKind.quarto:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Wrap(
+            spacing: 5,
+            runSpacing: 5,
+            alignment: WrapAlignment.center,
+            children: [
+              for (var i = 0; i < 9; i++)
+                Container(
+                  width: 13,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    shape: i.isEven ? BoxShape.circle : BoxShape.rectangle,
+                    color: i.isEven ? const Color(0xFF1B1F22) : const Color(0xFFF6F0E4),
+                    border: Border.all(color: const Color(0xFF9B7A50)),
+                  ),
+                ),
+            ],
+          ),
+        );
+      case GameKind.yote:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 8; i++)
+                Transform.translate(
+                  offset: Offset(
+                    (i % 4 - 1.5) * 13,
+                    (i ~/ 4 - 0.5) * 18,
+                  ),
+                  child: GameStone(white: i.isOdd, size: 12),
+                ),
+            ],
+          ),
+        );
+      case GameKind.onitama:
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Transform.translate(
+                  offset: Offset((i - 1) * 16.0, 0),
+                  child: Container(
+                    width: 17,
+                    height: 25,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF6F0E4),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: const Color(0xFFC9A26B)),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      const ['虎', '龙', '鹤'][i],
+                      style: const TextStyle(
+                        color: Color(0xFFB53D32),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                 ),
             ],
           ),

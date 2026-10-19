@@ -55,6 +55,11 @@ void main() {
       '狐狸与鹅',
       '墙棋',
       '十二子棋',
+      '六子冲',
+      '三三棋',
+      '夸托',
+      '约特棋',
+      '鬼将棋',
     ]) {
       await tester.ensureVisible(find.text(title));
       await tester.pump(const Duration(milliseconds: 100));
