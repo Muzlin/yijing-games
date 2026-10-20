@@ -88,6 +88,9 @@ class ShogiGame extends TurnGame {
   @override
   String sideName(int side) => side == 0 ? '黑方' : '白方';
 
+  @override
+  bool get inCheck => _inCheck(_side);
+
   static int ownerOf(int value) => value > 0 ? 0 : 1;
   static int typeOf(int value) => value.abs();
   static bool isPromoted(int value) => value.abs() > 8;

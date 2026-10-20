@@ -135,6 +135,16 @@ abstract class TurnGame {
   /// rolls dice, so it is excluded).
   bool get llmSupported => true;
 
+  /// True when the side to move is currently in check. Most games do not
+  /// have a check concept.
+  bool get inCheck => false;
+
+  /// Optional normalized (0..1) board points for a real mouse click path.
+  /// Used by the macOS system-mouse takeover. A one-point path means the
+  /// board handles the move with a single tap; two points mean "select source,
+  /// then tap destination".
+  List<Offset>? pointerPath(Object? move, {required bool flipped}) => null;
+
   /// All legal moves, used as candidates for the 32B model.
   List<Object?> get llmMoves => const [];
 

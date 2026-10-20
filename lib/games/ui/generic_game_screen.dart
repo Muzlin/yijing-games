@@ -44,6 +44,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
   bool _systemMouseAssist = false;
   bool paused = false;
   final GlobalKey _assistKey = GlobalKey();
+  final GlobalKey _boardKey = GlobalKey();
   bool manualOverride = false;
   bool flipped = false;
   Object? hint;
@@ -230,7 +231,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
       _lastMoveText = game.describeMove(move);
       _lastMoveSide = mover;
       boardVersion++;
-      AppSound.move();
+      _playMoveSound();
     }
     if (!mounted) return;
     setState(() {});
@@ -265,6 +266,14 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     }
   }
 
+  void _playMoveSound() {
+    if (game.inCheck) {
+      AppSound.check();
+    } else {
+      AppSound.move();
+    }
+  }
+
   void _reportResult() {
     if (!_isOnlineReal || _resultReported || _forcedWinner != null) return;
     _resultReported = true;
@@ -281,7 +290,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     hint = null;
     boardVersion++;
     if (manualOverride) manualOverride = false;
-    AppSound.move();
+    _playMoveSound();
     setState(() {});
     _afterMove(local: true);
   }
@@ -295,7 +304,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     hint = null;
     boardVersion++;
     if (manualOverride) manualOverride = false;
-    AppSound.move();
+    _playMoveSound();
     setState(() {});
     _afterMove(local: true);
   }
@@ -310,7 +319,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
     _lastMoveSide = mover;
     hint = null;
     boardVersion++;
-    AppSound.move();
+    _playMoveSound();
     setState(() {});
     _afterMove(local: true);
   }
@@ -403,37 +412,57 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
           game.side != config.humanSide) {
         return;
       }
-      final context = _assistKey.currentContext;
-      final box = context?.findRenderObject() as RenderBox?;
+      final move = game.aiMove(3);
+      if (move == null || !game.isLegal(move)) {
+        _systemMouseFallback();
+        return;
+      }
+      final path = game.pointerPath(move, flipped: flipped);
+      if (path == null || path.isEmpty) {
+        _systemMouseFallback(
+          '当前棋种暂不支持系统鼠标落子，已切回普通 AI 托管。',
+        );
+        return;
+      }
+      final box = _boardKey.currentContext?.findRenderObject() as RenderBox?;
       if (box == null || !box.hasSize) {
         _systemMouseFallback();
         return;
       }
-      final point = box.localToGlobal(box.size.center(Offset.zero));
       final before = game.moveCount;
-      final ok = await SystemMouse.click(point);
-      if (!ok) {
-        _systemMouseFallback();
-        return;
+      for (final normalized in path) {
+        if (generation != _aiGeneration || !_systemMouseAssist) return;
+        final point = box.localToGlobal(Offset(
+          normalized.dx.clamp(0.0, 1.0) * box.size.width,
+          normalized.dy.clamp(0.0, 1.0) * box.size.height,
+        ));
+        final ok = await SystemMouse.click(point);
+        if (!ok) {
+          _systemMouseFallback();
+          return;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 280));
       }
-      await Future<void>.delayed(const Duration(milliseconds: 650));
+      await Future<void>.delayed(const Duration(milliseconds: 450));
       if (generation == _aiGeneration &&
           _systemMouseAssist &&
           !_isOver &&
           game.side == config.humanSide &&
           game.moveCount == before) {
-        _systemMouseFallback();
+        _systemMouseFallback(
+          '系统鼠标点击未能完成落子，已切回普通 AI 托管。',
+        );
       }
     });
   }
 
-  void _systemMouseFallback() {
+  void _systemMouseFallback([String? message]) {
     if (!mounted) return;
     _aiGeneration++;
     _systemMouseAssist = false;
     assisted = true;
     setState(() {});
-    _showSystemMouseMessage('系统辅助点击失败，已切回普通 AI 托管。');
+    _showSystemMouseMessage(message ?? '系统辅助点击失败，已切回普通 AI 托管。');
     _maybeAi();
   }
 
@@ -752,13 +781,16 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                   height: boardH,
                   child: GameBoardFrame(
                     accent: config.meta.accent,
-                    child: KeyedSubtree(
-                      key: ValueKey('${boardVersion}_$flipped'),
-                      child: game.buildBoard(
+                    child: SizedBox(
+                      key: _boardKey,
+                      child: KeyedSubtree(
+                        key: ValueKey('${boardVersion}_$flipped'),
+                        child: game.buildBoard(
                         interactive: _canHumanMove,
                         onMove: _onBoardMove,
-                        hint: hint,
-                        flipped: flipped,
+                          hint: hint,
+                          flipped: flipped,
+                        ),
                       ),
                     ),
                   ),
@@ -1154,7 +1186,7 @@ class _GenericGameScreenState extends State<GenericGameScreen> {
                 : (assisted || _systemMouseAssist) &&
                         side == config.humanSide
                     ? (_systemMouseAssist
-                        ? '系统鼠标托管中 · 自动点击'
+                        ? '系统鼠标托管中 · 点击棋盘'
                         : 'AI 托管中 · 自动落子')
                     : manualOverride && active
                         ? '你来帮它走一步'

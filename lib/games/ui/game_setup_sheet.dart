@@ -328,8 +328,8 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
                                 ),
                                 SizedBox(height: 2),
                                 Text(
-                                  '开启后，AI 托管会用 macOS 辅助功能真实点击“AI 代下”；'
-                                  '首次需要授予辅助功能权限。',
+                                  '开启后，AI 托管会用 macOS 辅助功能真实点击棋盘上的棋子与落点；'
+                                  '首次需要授予辅助功能权限（目前支持中国象棋）。',
                                   style: TextStyle(
                                     fontSize: 9.5,
                                     height: 1.4,

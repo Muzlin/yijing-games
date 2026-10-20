@@ -91,6 +91,24 @@ class XiangqiGame extends TurnGame {
   String sideName(int side) => side == 0 ? '红方' : '黑方';
 
   @override
+  bool get inCheck => isInCheck(_side);
+
+  @override
+  List<Offset>? pointerPath(Object? move, {required bool flipped}) {
+    if (move is! int) return null;
+    final from = move ~/ cells;
+    final to = move % cells;
+    Offset point(int index) {
+      final row = index ~/ cols;
+      final col = index % cols;
+      final vx = flipped ? 8 - col : col;
+      final vy = flipped ? 9 - row : row;
+      return Offset((vx + 0.5) / 9, (vy + 0.5) / 10);
+    }
+    return [point(from), point(to)];
+  }
+
+  @override
   String get statusText {
     if (_winner != null) return resultTitle;
     if (isInCheck(_side)) return '${sideName(_side)}被将军';
@@ -741,6 +759,8 @@ class _XiangqiBoardState extends State<XiangqiBoard> {
         final height = cell * 10;
         final padding = cell * 0.5;
         final pieceSize = cell * 0.86;
+        final checked = game.isInCheck(game.side);
+        final checkedKing = checked ? game._kingSquare(game.side) : null;
         final targets = _selected == null ? <int>[] : game.legalTargets(_selected!);
         final pieces = <Widget>[];
 
@@ -801,6 +821,13 @@ class _XiangqiBoardState extends State<XiangqiBoard> {
                       }
                       final piece = game.board[index];
                       if (piece != 0 && game._colorOf(piece) == game.side) {
+                        // While checked, only pieces with a move that resolves
+                        // the check are selectable. This avoids the impression
+                        // that every piece can move.
+                        if (checked && game.legalTargets(index).isEmpty) {
+                          setState(() => _selected = null);
+                          return;
+                        }
                         setState(() => _selected = index);
                       } else {
                         setState(() => _selected = null);
@@ -818,6 +845,7 @@ class _XiangqiBoardState extends State<XiangqiBoard> {
                         flipped: widget.flipped,
                         targets: targets,
                         selected: _selected,
+                        checkedKing: checkedKing,
                       ),
                     ),
                   ),
@@ -839,6 +867,7 @@ class _XiangqiPainter extends CustomPainter {
   final bool flipped;
   final List<int> targets;
   final int? selected;
+  final int? checkedKing;
 
   _XiangqiPainter({
     required this.game,
@@ -847,6 +876,7 @@ class _XiangqiPainter extends CustomPainter {
     required this.flipped,
     required this.targets,
     required this.selected,
+    required this.checkedKing,
   });
 
   @override
@@ -954,6 +984,35 @@ class _XiangqiPainter extends CustomPainter {
           Paint()..color = const Color(0xFF4A2E16).withValues(alpha: 0.45),
         );
       }
+    }
+    if (checkedKing != null) {
+      final row = checkedKing! ~/ 9;
+      final col = checkedKing! % 9;
+      final vx = flipped ? 8 - col : col;
+      final vy = flipped ? 9 - row : row;
+      final center = Offset(padding + vx * cell, padding + vy * cell);
+      canvas.drawCircle(
+        center,
+        cell * 0.58,
+        Paint()
+          ..color = const Color(0xFFD94338).withValues(alpha: 0.28)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+      );
+      canvas.drawCircle(
+        center,
+        cell * 0.49,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.6
+          ..color = const Color(0xFFD94338),
+      );
+      canvas.drawRect(
+        rect.deflate(2),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = const Color(0xFFD94338).withValues(alpha: 0.7),
+      );
     }
     if (selected != null) {
       final row = selected! ~/ 9;

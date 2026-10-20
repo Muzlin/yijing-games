@@ -309,7 +309,7 @@ class _GamesHubScreenState extends State<GamesHubScreen> {
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      '弈境 · 棋牌合集  v3.1.0',
+                      '弈境 · 棋牌合集  v3.1.1',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10.5,
